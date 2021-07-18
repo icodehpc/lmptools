@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, validator, parse_obj_as
+from .atom import Atom
 import pandas as pd
 from typing import List, Dict, Optional
 from loguru import logger
@@ -36,12 +37,12 @@ class DumpSnapshot(BaseModel):
     timestamp: int
     box: SimulationBox
     natoms: int
-    atoms: pd.DataFrame
+    atoms: List[Atom]
     unwrapped: bool = False
 
     @validator('atoms')
-    def num_atoms_must_match_natoms(cls, v: pd.DataFrame, values: dict, **kwargs):
-        if len(v.index) != values['natoms']:
+    def num_atoms_must_match_natoms(cls, v: List[Atom], values: dict, **kwargs):
+        if len(v) != values['natoms']:
             raise AssertionError(f"Number of atoms read from file does not match {values['natoms']}")
         return v
 
@@ -154,7 +155,7 @@ class DumpFileIterator(object):
 
             snap['box'] = SimulationBox(**box_dimensions)
 
-            atoms: List[Dict[str, float]] = []
+            atoms: List[Atom] = []
             if snap['natoms']:
                 item = self.file.readline()
                 keys = item.split()[2:]
@@ -163,9 +164,8 @@ class DumpFileIterator(object):
                     row = {}
                     for key, value in zip(keys, self.file.readline().split()):
                         row[key] = float(value)
-                    atoms.append(row)
-
-            snap['atoms'] = pd.DataFrame.from_dict(atoms)
+                    atoms.append(parse_obj_as(Atom, row))
+            snap['atoms'] = atoms
 
             if self.unwrap:
                 return self.unwrapped_snapshot(parse_obj_as(DumpSnapshot, snap))

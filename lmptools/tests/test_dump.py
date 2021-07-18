@@ -2,6 +2,9 @@ import pytest
 import os
 import random
 import pandas as pd
+from typing import List
+from lmptools.atom import Atom
+from pydantic.tools import parse_obj_as
 from lmptools.dump import DumpFileIterator, SimulationBox
 
 @pytest.fixture(scope='session')
@@ -37,18 +40,18 @@ def dump_file():
         f.write(f"{zlo} {zhi}\n")
 
         f.write(f"ITEM: ATOMS {dump_columns}\n")
-        atoms = []
+        atoms: List[Atom] = []
         for _ in range(num_atoms):
             entry = {}
-            for key, value in zip(dump_columns.split(), [random.random() for _ in range(len(dump_columns))]):
+            for key, value in zip(dump_columns.split(), [random.random()+random.randint(100, 1000) for _ in range(len(dump_columns))]):
                 entry[key] = value
-            atoms.append(entry)
-            f.write(" ".join([str(value) for value in entry.values()])+"\n")
+            atom = parse_obj_as(Atom, entry)
+            atoms.append(atom)
+            f.write(" ".join([str(atom.__dict__[key]) for key in dump_columns.split()])+"\n")
     f.close()
-    atoms_df = pd.DataFrame.from_dict(atoms)
     yield {'filename': filename, 'timestamp': timestep, 'natoms': num_atoms,
             'box': SimulationBox(xlo=xlo, xhi=xhi, ylo=ylo, yhi=yhi, zlo=zlo, zhi=zhi, xprd='pp', yprd='pp', zprd='pp'),
-            'atoms': atoms_df}
+            'atoms': atoms}
 
     os.remove("dump.test.lammpstrj")
 
@@ -60,4 +63,4 @@ def test_dump_snapshot_parse(dump_file):
     assert snapshot.natoms == dump_file['natoms']
     assert snapshot.timestamp == dump_file['timestamp']
     assert snapshot.box == dump_file['box']
-    assert snapshot.atoms.equals(dump_file['atoms']) == True
+    assert all([snapshot.atoms[i] == dump_file['atoms'][i] for i in range(snapshot.natoms)]) == True

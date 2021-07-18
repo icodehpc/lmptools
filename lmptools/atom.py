@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 
 class Vector(BaseModel):
     x: float
@@ -9,7 +9,7 @@ class Vector(BaseModel):
     z: float
 
     @property
-    def scalar(self):
+    def magnitude(self):
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
 class Atom(BaseModel):
@@ -37,3 +37,12 @@ class Atom(BaseModel):
     omega: Optional[Vector] = None
     angmom: Optional[Vector] = None
     torque: Optional[Vector] = None
+    ix: Optional[int] = None
+    iy: Optional[int] = None
+    iz: Optional[int] = None
+
+    def __str__(self):
+        return ", ".join([f"{key}: {self.__dict__[key]}" for key in self.__fields_set__])
+
+    def __eq__(self, other: Atom) -> bool:
+        return all([self.__dict__[k] == other.__dict__[k] for k in self.__fields_set__])
