@@ -16,9 +16,10 @@ class Atom(BaseModel):
     id: int = None
     mol: Optional[int] = None
     type: int = None
+    mass: Optional[float] = None
     x: Optional[float] = None   # unscaled xcoordinate
     xu: Optional[float] = None  # unwrap coordinate
-    xs: Optional[float] = None  # scaled coordiante
+    xs: Optional[float] = None
     xsu: Optional[float] = None # scaled unwrapped
     y: Optional[float] = None
     yu: Optional[float] = None
@@ -46,3 +47,20 @@ class Atom(BaseModel):
 
     def __eq__(self, other: Atom) -> bool:
         return all([self.__dict__[k] == other.__dict__[k] for k in self.__fields_set__])
+
+    def unwrap(self, lx: float, ly: float, lz: float) -> None:
+        """
+        Unwrap the atom's coordinate based the image flags provided
+        """
+        if self.ix:
+            self.x += self.ix*lx
+            self.xu = self.x
+
+        if self.iy:
+            self.y += self.iy*ly
+            self.yu = self.y
+
+        if self.iz:
+            self.z += self.iz*lz
+            self.zu = self.z
+        return None
