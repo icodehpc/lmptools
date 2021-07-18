@@ -16,7 +16,7 @@ class Atom(BaseModel):
     id: int = None
     mol: Optional[int] = None
     type: int = None
-    mass: Optional[float] = None
+    mass: float = 1.0
     x: Optional[float] = None   # unscaled xcoordinate
     xu: Optional[float] = None  # unwrap coordinate
     xs: Optional[float] = None
