@@ -1,7 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
-import pandas as pd
 from typing import List, Dict, Optional
 from loguru import logger
 
