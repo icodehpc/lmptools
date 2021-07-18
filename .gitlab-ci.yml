@@ -1,8 +1,0 @@
-stages:
-  - build
-  - test
-
-build-python-package:
-  stage: build
-  script:
-    - echo "hello world!"
