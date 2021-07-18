@@ -18,6 +18,14 @@ def dump_file():
     zlo = -box_length
     zhi = box_length
 
+    dump_columns: str = ""
+    if random.random() <= 0.25:
+        dump_columns = "id type mol x y z ix iy iz"
+    elif random.random() > 0.25 or random.random() <= 0.5:
+        dump_columns = "id type mol x xu xsu yu z ix iy"
+    else:
+        dump_columns = "id type mol x y zu zs z"
+
     with open(filename, "w") as f:
         f.write("ITEM: TIMESTEP\n")
         f.write(f"{timestep}\n")
@@ -27,21 +35,15 @@ def dump_file():
         f.write(f"{xlo} {xhi}\n")
         f.write(f"{ylo} {yhi}\n")
         f.write(f"{zlo} {zhi}\n")
-        f.write("ITEM: ATOMS id type mol x y z ix iy iz\n")
+
+        f.write(f"ITEM: ATOMS {dump_columns}\n")
         atoms = []
-        for i in range(num_atoms):
+        for _ in range(num_atoms):
             entry = {}
-            entry["id"] = float(i+1)
-            entry["type"] = float(1)
-            entry["mol"] = float(2)
-            entry["x"] = random.random()
-            entry["y"] = random.random()
-            entry["z"] = random.random()
-            entry["ix"] = float(random.randint(-2, 2))
-            entry["iy"] = float(random.randint(-2, 2))
-            entry["iz"] = float(random.randint(-2, 2))
+            for key, value in zip(dump_columns.split(), [random.random() for _ in range(len(dump_columns))]):
+                entry[key] = value
             atoms.append(entry)
-            f.write(f'{entry["id"]} {entry["type"]} {entry["mol"]} {entry["x"]} {entry["y"]} {entry["z"]} {entry["ix"]} {entry["iy"]} {entry["iz"]}\n')
+            f.write(" ".join([str(value) for value in entry.values()])+"\n")
     f.close()
     atoms_df = pd.DataFrame.from_dict(atoms)
     yield {'filename': filename, 'timestamp': timestep, 'natoms': num_atoms,
