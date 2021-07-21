@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(name='lmptools',
-      version='0.1.0',
+      version='0.1.1',
       description='Lammps python post processing tools',
       author='Venkat Bala',
       author_email='vbalasu8@uwo.ca',
