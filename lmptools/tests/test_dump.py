@@ -58,9 +58,9 @@ def dump_file():
 
 def test_dump_snapshot_parse(dump_file):
     d = DumpFileIterator(dump_file['filename'])
-    snapshot = d.read_snapshot()
-    
-    assert snapshot.natoms == dump_file['natoms']
-    assert snapshot.timestamp == dump_file['timestamp']
-    assert snapshot.box == dump_file['box']
-    assert all([snapshot.atoms[i] == dump_file['atoms'][i] for i in range(snapshot.natoms)]) == True
+    snapshot = next(d)
+    if snapshot:
+        assert snapshot.natoms == dump_file['natoms']
+        assert snapshot.timestamp == dump_file['timestamp']
+        assert snapshot.box == dump_file['box']
+        assert all([snapshot.atoms[i] == dump_file['atoms'][i] for i in range(snapshot.natoms)]) == True

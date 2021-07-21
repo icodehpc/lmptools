@@ -1,7 +1,8 @@
 from __future__ import annotations
+from io import FileIO, TextIOWrapper
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
-from typing import List, Dict, Optional
+from typing import List, Optional
 from loguru import logger
 
 class SimulationBox(BaseModel):
@@ -21,6 +22,21 @@ class SimulationBox(BaseModel):
     xz: float = 0.0
     yz: float = 0.0
     triclinic: bool = False
+
+    @property
+    def Lx(self):
+        return self.xhi - self.xlo
+
+    @property
+    def Ly(self):
+        return self.yhi - self.ylo
+
+    @property
+    def Lz(self):
+        return self.zhi - self.zlo
+
+    def __eq__(self, other: SimulationBox) -> bool:
+        return all([self.__dict__[key] == other.__dict__[key] for key in self.__fields_set__])
 
     def __str__(self):
         if self.triclinic:
@@ -48,12 +64,20 @@ class DumpSnapshot(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    def __eq__(self, snapshot: DumpSnapshot) -> bool:
+        """
+        Check if snapshots match
+        """
+        return all([self.timestamp == snapshot.timestamp,
+                    self.box == snapshot.box,
+                    self.natoms == snapshot.natoms])
+                
     def __str__(self):
         timestep_header = "ITEM: TIMESTEP"
         num_atoms_header = "ITEM: NUMBER OF ATOMS"
         simbox_header = f"ITEM: BOX BOUNDS {self.box.xprd} {self.box.yprd} {self.box.zprd}"
-        atoms_header = "ITEM: ATOMS "+" ".join([colname for colname in self.atoms.columns])
-        atoms = self.atoms.to_string(header=False, index=False, index_names=False).split('\n')
+        atoms_header = "ITEM: ATOMS "+" ".join([colname for colname in self.atoms[0].__fields_set__])
+        atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
         
         return f"{timestep_header}\n"+\
                 f"{self.timestamp}\n"+\
@@ -75,36 +99,24 @@ class DumpFileIterator(object):
         except FileNotFoundError:
             logger.error(f"{dump_file_name} not found")
 
-    def unwrapped_snapshot(self, snapshot: DumpSnapshot) -> DumpSnapshot:
-        if "ix" not in snapshot.atoms.columns:
-            logger.info("Periodic image flags not present in snapshot, not unwrapping ... ")
-            return snapshot
-        
-        xprd = snapshot.box.xhi - snapshot.box.xlo
-        yprd = snapshot.box.yhi - snapshot.box.ylo
-        zprd = snapshot.box.zhi - snapshot.box.zlo
-
-        snapshot.atoms["x"] += snapshot.atoms["ix"]*xprd
-        snapshot.atoms["y"] += snapshot.atoms["iy"]*yprd
-        snapshot.atoms["z"] += snapshot.atoms["iz"]*zprd
-        return snapshot
-
-    def read_snapshot(self) -> Optional[DumpSnapshot]:
+    @staticmethod
+    def read_snapshot(file: TextIOWrapper, unwrap: bool) -> Optional[DumpSnapshot]:
         """
         Read the dump file and return a single snapshot
         """
         try:
             snap: dict = {}
-            if self.unwrap:
-                snap["unwrapped"] = True
+            item = file.readline()
+            # Readline with return an empty string if end of file is reached
+            if len(item) == 0:
+                return None
+            snap['timestamp'] = int(file.readline().split()[0])
+            item = file.readline()
+            snap['natoms'] = int(file.readline())
 
-            item = self.file.readline()
-            snap['timestamp'] = int(self.file.readline().split()[0])
-            self.file.readline()
-            snap['natoms'] = int(self.file.readline())
-
-            item = self.file.readline()
-            words = item.split("BOUNDS ".strip())
+            item = file.readline()
+            words = item.split("BOUNDS ")
+            # Simulation box periodicity (pp, ps ..)
             box_periodicities = words[1].strip().split()
 
              # Read in box dimensions
@@ -120,7 +132,7 @@ class DumpFileIterator(object):
                     box_dimensions['triclinic'] = True
 
             # xlo, xhi, xy
-            words = self.file.readline().split()
+            words = file.readline().split()
             if len(words) == 2:
                 box_dimensions['xlo'] = float(words[0])
                 box_dimensions['xhi'] = float(words[1])
@@ -131,7 +143,7 @@ class DumpFileIterator(object):
                 box_dimensions['xy'] = float(words[2])
 
             # ylo, yhi, xz
-            words = self.file.readline().split()
+            words = file.readline().split()
             if len(words) == 2:
                 box_dimensions['ylo'] = float(words[0])
                 box_dimensions['yhi'] = float(words[1])
@@ -142,7 +154,7 @@ class DumpFileIterator(object):
                 box_dimensions['xz'] = float(words[2])
 
             # zlo, zhi, yz
-            words = self.file.readline().split()
+            words = file.readline().split()
             if len(words) == 2:
                 box_dimensions['zlo'] = float(words[0])
                 box_dimensions['zhi'] = float(words[1])
@@ -156,32 +168,33 @@ class DumpFileIterator(object):
 
             atoms: List[Atom] = []
             if snap['natoms']:
-                item = self.file.readline()
-                keys = item.split()[2:]
+                column_names = file.readline().split()[2:]
 
                 for _ in range(0, snap['natoms']):
                     row = {}
-                    for key, value in zip(keys, self.file.readline().split()):
-                        row[key] = float(value)
-                    atoms.append(parse_obj_as(Atom, row))
-            snap['atoms'] = atoms
+                    for cname, value in zip(column_names, file.readline().split()):
+                        row[cname] = float(value)
+                    atom = parse_obj_as(Atom, row)
 
-            if self.unwrap:
-                return self.unwrapped_snapshot(parse_obj_as(DumpSnapshot, snap))
-            else:
-                return parse_obj_as(DumpSnapshot, snap)
+                    # Unwrap coordinates
+                    if unwrap:
+                        atom.unwrap(snap['box'].Lx, snap['box'].Ly, snap['box'].Lz)
+                    atoms.append(atom)
+                snap['atoms'] = atoms
+                snapshot = parse_obj_as(DumpSnapshot, snap)
+            return snapshot
         except Exception as e:
-            logger.exception(e)
+            logger.error(e)
             return None
 
     def __iter__(self):
         return self
 
     def __next__(self) -> DumpSnapshot:
-        while True:
-            snapshot = self.read_snapshot()
-            if snapshot:
-                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
-                return snapshot
-            else:
-                raise StopIteration()
+       while True:
+           snapshot = self.read_snapshot(self.file, self.unwrap)
+           if snapshot:
+               logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
+               return snapshot
+           else:
+               raise StopIteration()

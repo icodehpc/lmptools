@@ -12,6 +12,9 @@ class Vector(BaseModel):
     def magnitude(self):
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
+    def __eq__(self, vector: Vector) -> bool:
+        return all([self.__dict__[key] == vector.__dict__[key] for key in self.__fields_set__])
+
 class Atom(BaseModel):
     id: int = None
     mol: Optional[int] = None
@@ -43,7 +46,7 @@ class Atom(BaseModel):
     iz: Optional[int] = None
 
     def __str__(self):
-        return ", ".join([f"{key}: {self.__dict__[key]}" for key in self.__fields_set__])
+        return " ".join([f"{self.__dict__[key]}" for key in self.__fields_set__])
 
     def __eq__(self, other: Atom) -> bool:
         return all([self.__dict__[k] == other.__dict__[k] for k in self.__fields_set__])
