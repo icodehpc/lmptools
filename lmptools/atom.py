@@ -1,5 +1,6 @@
 from __future__ import annotations
 import math
+import pandas as pd
 from pydantic import BaseModel
 from typing import Optional, Any
 
@@ -7,6 +8,10 @@ class Vector(BaseModel):
     x: float
     y: float
     z: float
+
+    @property
+    def dataframe(self):
+        return pd.DataFrame.from_dict([self.dict(exclude_unset=True)])
 
     @property
     def magnitude(self):
@@ -44,6 +49,7 @@ class Atom(BaseModel):
     ix: Optional[int] = None
     iy: Optional[int] = None
     iz: Optional[int] = None
+    unwrapped: bool = False
 
     def __str__(self):
         return " ".join([f"{self.__dict__[key]}" for key in self.__fields_set__])
@@ -55,15 +61,20 @@ class Atom(BaseModel):
         """
         Unwrap the atom's coordinate based the image flags provided
         """
-        if self.ix:
+        self.unwrapped = True
+        if self.ix is not None:
             self.x += self.ix*lx
             self.xu = self.x
 
-        if self.iy:
+        if self.iy is not None:
             self.y += self.iy*ly
             self.yu = self.y
 
-        if self.iz:
+        if self.iz is not None:
             self.z += self.iz*lz
             self.zu = self.z
         return None
+
+    @property
+    def dataframe(self):
+        return pd.DataFrame.from_dict([self.dict(exclude_unset=True)])

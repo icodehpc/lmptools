@@ -1,5 +1,6 @@
 from __future__ import annotations
-from io import FileIO, TextIOWrapper
+from io import TextIOWrapper
+import pandas as pd
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
 from typing import List, Optional
@@ -87,6 +88,9 @@ class DumpSnapshot(BaseModel):
                 f"{str(self.box)}"+\
                 f"{atoms_header}\n"+\
                 "\n".join(atoms)
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame.from_dict([atom.dict(exclude_unset=True) for atom in self.atoms])
 
 class DumpFileIterator(object):
     """
