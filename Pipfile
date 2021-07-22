@@ -13,11 +13,10 @@ pytest = "*"
 setuptools = "*"
 jupyterlab = "*"
 jupyter = "*"
-lmptools = {path = "./dist/lmptools-0.1.1-py3-none-any.whl"}
+lmptools = {path = "./dist/lmptools-0.1.12-py3-none-any.whl"}
 
 [dev-packages]
 faker = "*"
-lmptools = {path = "./dist/lmptools-0.1.1-py3-none-any.whl"}
 
 [requires]
 python_version = "3.8"
