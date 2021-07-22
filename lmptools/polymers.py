@@ -18,9 +18,7 @@ class Polymer(BaseModel):
         Compute the center of mass of the chain using the unwrapped coordinates
         """
         # Assert that unwrapped coordinates are provided
-        unwrapped = (any([atom.xu == None for atom in self.atoms]) or \
-                    any([atom.yu == None for atom in self.atoms]) or \
-                    any([atom.zu == None for atom in self.atoms]))
+        unwrapped = all([atom.unwrapped for atom in self.atoms])
         if not unwrapped:
             raise AssertionError(f"Polymer not unwrapped")
 
@@ -34,9 +32,7 @@ class Polymer(BaseModel):
         """
         Radius of gyration of the polymer chain
         """
-        unwrapped = (any([atom.xu == None for atom in self.atoms]) or \
-                    any([atom.yu == None for atom in self.atoms]) or \
-                    any([atom.zu == None for atom in self.atoms]))
+        unwrapped = all([atom.unwrapped for atom in self.atoms])
         if not unwrapped:
             raise AssertionError(f"Polymer not unwrapped")
 
@@ -58,12 +54,10 @@ class Polymer(BaseModel):
         tensor = np.array([[rxx, rxy, rxz], [rxy, ryy, ryz], [rxz, ryz, rzz]])
 
         eigenvalues, _ = np.linalg.eig(tensor)
-        eigenvalues = eigenvalues.argsort()[::-1]
+        index = eigenvalues.argsort()[::-1]
         
         # return the principal eigenvalue
-        return np.sqrt(eigenvalues[0])
-
-
+        return np.sqrt(eigenvalues[index][0])
 
     def __len__(self):
         """
