@@ -1,6 +1,7 @@
-from __future__ import annotations
-from io import TextIOWrapper
 import pandas as pd
+from __future__ import annotations
+from .exceptions import SkipSnapshot
+from io import TextIOWrapper
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
 from typing import List, Optional
@@ -88,9 +89,57 @@ class DumpSnapshot(BaseModel):
                 f"{str(self.box)}"+\
                 f"{atoms_header}\n"+\
                 "\n".join(atoms)
+
     @property
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame.from_dict([atom.dict(exclude_unset=True) for atom in self.atoms])
+
+class DumpCallback(object):
+    """
+    Base class used to build new callbacks that will be called as the dump file is parsed
+
+    Custom callbacks can be created by subclassing `DumpCallback` and override the method associated
+    with the stage of interest
+    """
+    def __init__(self):
+        pass
+
+    def on_snapshot_parse_begin(self, *args, **kwargs):
+        """
+        Method to be called right before a new snapshot is parsed
+        """
+        pass
+
+    def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
+        """
+        method called when the timestamp of a snapshot has been parsed
+        """
+        pass
+
+    def on_snapshot_parse_natoms(self, natoms: int, *args, **kwargs):
+        """
+        Method invoked when the number of atoms is parsed from the dump file
+        """
+        pass
+
+    def on_snapshot_parse_box(self, box: SimulationBox, *args, **kwargs):
+        """
+        Method called when the simulation box info is parsed
+        """
+        pass
+
+    def on_snapshot_parse_atoms(self, atoms: List[Atom], *args, **kwargs):
+        """
+        Method called when atoms coordinates are parsed from file
+        """
+        pass
+
+    def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
+        """
+        Method called when a snapshot has been completely parsed
+        """
+        pass
+
 
 class DumpFileIterator(object):
     """
@@ -104,19 +153,32 @@ class DumpFileIterator(object):
             logger.error(f"{dump_file_name} not found")
 
     @staticmethod
-    def read_snapshot(file: TextIOWrapper, unwrap: bool) -> Optional[DumpSnapshot]:
+    def read_snapshot(file: TextIOWrapper, unwrap: bool, callback: Optional[DumpCallback]=None) -> Optional[DumpSnapshot]:
         """
         Read the dump file and return a single snapshot
         """
         try:
+            # Invoke on_snapshot_parse_begin
+            if callback:
+                callback.on_snapshot_parse_begin()
+            
             snap: dict = {}
             item = file.readline() # +1
             # Readline with return an empty string if end of file is reached
             if len(item) == 0:
                 return None
             snap['timestamp'] = int(file.readline().split()[0]) #+1
+
+            # Invoke on_snapshot_parse_time
+            if callback:
+                callback.on_snapshot_parse_time(snap['timestamp'])
+
             item = file.readline()
             snap['natoms'] = int(file.readline()) #+1
+
+            # Invoke on_snapshot_parse_natoms
+            if callback:
+                callback.on_snapshot_parse_natoms(snap['natoms'])
 
             item = file.readline() #+1
             words = item.split("BOUNDS ")
@@ -170,6 +232,10 @@ class DumpFileIterator(object):
 
             snap['box'] = SimulationBox(**box_dimensions)
 
+            # Invoke on_snapshot_parse_box
+            if callback:
+                callback.on_snapshot_parse_box(snap['box'])
+
             atoms: List[Atom] = []
             if snap['natoms']:
                 column_names = file.readline().split()[2:] #+1
@@ -185,17 +251,32 @@ class DumpFileIterator(object):
                         atom.unwrap(snap['box'].Lx, snap['box'].Ly, snap['box'].Lz)
                     atoms.append(atom)
                 snap['atoms'] = atoms
+
+                # Invoke on_snapshot_parse_atoms
+                if callback:
+                    callback.on_snapshot_parse_atoms(snap['atoms'])
+                
                 snapshot = parse_obj_as(DumpSnapshot, snap)
+
+                # Invoke on_snapshot_parse_end
+                if callback:
+                    callback.on_snapshot_parse_end(snapshot)
             return snapshot
+
+        except SkipSnapshot as e:
+            logger.info(f"{e}")
+            return None
+
         except Exception as e:
             logger.error(e)
             return None
+        
 
     def __iter__(self):
         return self
 
-    def __next__(self) -> DumpSnapshot:
-       while True:
+    def __next__(self) -> Optional[DumpSnapshot]:
+        while True:
            snapshot = self.read_snapshot(self.file, self.unwrap)
            if snapshot:
                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
@@ -203,42 +284,15 @@ class DumpFileIterator(object):
            else:
                raise StopIteration()
 
-class DumpCallback(object):
+
+class Dump:
     """
-    Base class used to build new callbacks that will be called as the dump file is parsed
+    Convenience wrapper around the DumpFileIterator class
 
-    Custom callbacks can be created by subclassing `DumpCallback` and override the method associated
-    with the stage of interest
+    Provides the parse method that will kick off parsing the entire dump file sequentially whilst taking in
+    an instance of the DumpCallbacks for custom callback executions
     """
-    def __init__(self):
-        pass
 
-    def on_snapshot_parse_begin(self, *args, **kwargs):
-        """
-        Method to be called right before a new snapshot is parsed
-        """
-        pass
-
-    def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
-        """
-        method called when the timestamp of a snapshot has been parsed
-        """
-        pass
-
-    def on_snapshot_parse_box(self, box: SimulationBox, *args, **kwargs):
-        """
-        Method called when the simulation box info is parsed
-        """
-        pass
-
-    def on_snapshot_parse_atoms(self, atoms: List[Atom], *args, **kwargs):
-        """
-        Method called when atoms coordinates are parsed from file
-        """
-        pass
-
-    def on_snapshot_parse_end(self, *args, **kwargs):
-        """
-        Method called when a snapshot has been completely parsed
-        """
-        pass
+    def __init__(self, dump_file_name: str, unwrap: bool = False):
+        self._dump_file_name = dump_file_name
+        self._diterator = DumpFileIterator(dump_file_name=dump_file_name, unwrap=unwrap)
