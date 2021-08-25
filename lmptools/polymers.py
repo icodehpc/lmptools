@@ -54,10 +54,10 @@ class Polymer(BaseModel):
         tensor = np.array([[rxx, rxy, rxz], [rxy, ryy, ryz], [rxz, ryz, rzz]])
 
         eigenvalues, _ = np.linalg.eig(tensor)
-        index = eigenvalues.argsort()[::-1]
+        #index = eigenvalues.argsort()[::-1]
         
         # return the principal eigenvalue
-        return np.sqrt(eigenvalues[index][0])
+        return np.sqrt(np.sum(eigenvalues))
 
     def __len__(self):
         """

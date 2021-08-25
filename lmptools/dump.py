@@ -1,5 +1,5 @@
-import pandas as pd
 from __future__ import annotations
+import pandas as pd
 from .exceptions import SkipSnapshot
 from io import TextIOWrapper
 from pydantic import BaseModel, validator, parse_obj_as

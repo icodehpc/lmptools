@@ -5,7 +5,7 @@ import pandas as pd
 from typing import List
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
-from lmptools.dump import DumpFileIterator, DumpSnapshot, SimulationBox
+from lmptools import Dump, DumpFileIterator, DumpSnapshot, SimulationBox
 
 @pytest.fixture(scope='session')
 def dump_file():
@@ -62,6 +62,11 @@ def dump_file():
     yield {'filename': filename, 'snapshots': snapshots}
 
     os.remove("dump.test.lammpstrj")
+
+
+def test_dump_parse(dump_file):
+    d = Dump(dump_file['filename'])
+    d.parse()
 
 
 def test_dump_snapshot_parse(dump_file):
