@@ -145,42 +145,42 @@ class DumpFileIterator(object):
     """
     base dumpfile iterator
     """
-    def __init__(self, dump_file_name: str, unwrap: bool = False):
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None):
         self.unwrap = unwrap
+        self.callback = callback
         try:
             self.file = open(dump_file_name)
         except FileNotFoundError:
             logger.error(f"{dump_file_name} not found")
 
-    @staticmethod
-    def read_snapshot(file: TextIOWrapper, unwrap: bool, callback: Optional[DumpCallback]=None) -> Optional[DumpSnapshot]:
+    def read_snapshot(self) -> Optional[DumpSnapshot]:
         """
         Read the dump file and return a single snapshot
         """
         try:
             # Invoke on_snapshot_parse_begin
-            if callback:
-                callback.on_snapshot_parse_begin()
+            if self.callback:
+                self.callback.on_snapshot_parse_begin()
             
             snap: dict = {}
-            item = file.readline() # +1
+            item = self.file.readline() # +1
             # Readline with return an empty string if end of file is reached
             if len(item) == 0:
                 return None
-            snap['timestamp'] = int(file.readline().split()[0]) #+1
+            snap['timestamp'] = int(self.file.readline().split()[0]) #+1
 
             # Invoke on_snapshot_parse_time
-            if callback:
-                callback.on_snapshot_parse_time(snap['timestamp'])
+            if self.callback:
+                self.callback.on_snapshot_parse_time(snap['timestamp'])
 
-            item = file.readline()
-            snap['natoms'] = int(file.readline()) #+1
+            item = self.file.readline()
+            snap['natoms'] = int(self.file.readline()) #+1
 
             # Invoke on_snapshot_parse_natoms
-            if callback:
-                callback.on_snapshot_parse_natoms(snap['natoms'])
+            if self.callback:
+                self.callback.on_snapshot_parse_natoms(snap['natoms'])
 
-            item = file.readline() #+1
+            item = self.file.readline() #+1
             words = item.split("BOUNDS ")
             # Simulation box periodicity (pp, ps ..)
             box_periodicities = words[1].strip().split()
@@ -198,7 +198,7 @@ class DumpFileIterator(object):
                     box_dimensions['triclinic'] = True
 
             # xlo, xhi, xy
-            words = file.readline().split() #+1
+            words = self.file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['xlo'] = float(words[0])
                 box_dimensions['xhi'] = float(words[1])
@@ -209,7 +209,7 @@ class DumpFileIterator(object):
                 box_dimensions['xy'] = float(words[2])
 
             # ylo, yhi, xz
-            words = file.readline().split() #+1
+            words = self.file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['ylo'] = float(words[0])
                 box_dimensions['yhi'] = float(words[1])
@@ -220,7 +220,7 @@ class DumpFileIterator(object):
                 box_dimensions['xz'] = float(words[2])
 
             # zlo, zhi, yz
-            words = file.readline().split() #+1
+            words = self.file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['zlo'] = float(words[0])
                 box_dimensions['zhi'] = float(words[1])
@@ -233,34 +233,34 @@ class DumpFileIterator(object):
             snap['box'] = SimulationBox(**box_dimensions)
 
             # Invoke on_snapshot_parse_box
-            if callback:
-                callback.on_snapshot_parse_box(snap['box'])
+            if self.callback:
+                self.callback.on_snapshot_parse_box(snap['box'])
 
             atoms: List[Atom] = []
             if snap['natoms']:
-                column_names = file.readline().split()[2:] #+1
+                column_names = self.file.readline().split()[2:] #+1
 
                 for _ in range(0, snap['natoms']):
                     row = {}
-                    for cname, value in zip(column_names, file.readline().split()): # +natoms times
+                    for cname, value in zip(column_names, self.file.readline().split()): # +natoms times
                         row[cname] = float(value)
                     atom = parse_obj_as(Atom, row)
 
                     # Unwrap coordinates
-                    if unwrap:
+                    if self.unwrap:
                         atom.unwrap(snap['box'].Lx, snap['box'].Ly, snap['box'].Lz)
                     atoms.append(atom)
                 snap['atoms'] = atoms
 
                 # Invoke on_snapshot_parse_atoms
-                if callback:
-                    callback.on_snapshot_parse_atoms(snap['atoms'])
+                if self.callback:
+                    self.callback.on_snapshot_parse_atoms(snap['atoms'])
                 
                 snapshot = parse_obj_as(DumpSnapshot, snap)
 
                 # Invoke on_snapshot_parse_end
-                if callback:
-                    callback.on_snapshot_parse_end(snapshot)
+                if self.callback:
+                    self.callback.on_snapshot_parse_end(snapshot)
             return snapshot
 
         except SkipSnapshot as e:
@@ -277,9 +277,8 @@ class DumpFileIterator(object):
 
     def __next__(self) -> Optional[DumpSnapshot]:
         while True:
-           snapshot = self.read_snapshot(self.file, self.unwrap)
+           snapshot = self.read_snapshot()
            if snapshot:
-               logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
                return snapshot
            else:
                raise StopIteration()
@@ -296,3 +295,12 @@ class Dump:
     def __init__(self, dump_file_name: str, unwrap: bool = False):
         self._dump_file_name = dump_file_name
         self._diterator = DumpFileIterator(dump_file_name=dump_file_name, unwrap=unwrap)
+
+    def parse(self, callback: Optional[DumpCallback] = None) -> None:
+        """
+        Method to parse the entire dump file from start to end
+        """
+        for snapshot in self._diterator:
+            if snapshot:
+                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
+            continue
