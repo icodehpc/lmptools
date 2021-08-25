@@ -293,14 +293,14 @@ class Dump:
     """
 
     def __init__(self, dump_file_name: str, unwrap: bool = False):
+        self._unwrap = unwrap
         self._dump_file_name = dump_file_name
-        self._diterator = DumpFileIterator(dump_file_name=dump_file_name, unwrap=unwrap)
 
     def parse(self, callback: Optional[DumpCallback] = None) -> None:
         """
         Method to parse the entire dump file from start to end
         """
-        for snapshot in self._diterator:
+        for snapshot in DumpFileIterator(dump_file_name=self._dump_file_name, unwrap=self._unwrap, callback=callback):
             if snapshot:
                 logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
             continue
