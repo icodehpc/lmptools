@@ -110,15 +110,15 @@ class DumpFileIterator(object):
         """
         try:
             snap: dict = {}
-            item = file.readline()
+            item = file.readline() # +1
             # Readline with return an empty string if end of file is reached
             if len(item) == 0:
                 return None
-            snap['timestamp'] = int(file.readline().split()[0])
+            snap['timestamp'] = int(file.readline().split()[0]) #+1
             item = file.readline()
-            snap['natoms'] = int(file.readline())
+            snap['natoms'] = int(file.readline()) #+1
 
-            item = file.readline()
+            item = file.readline() #+1
             words = item.split("BOUNDS ")
             # Simulation box periodicity (pp, ps ..)
             box_periodicities = words[1].strip().split()
@@ -136,7 +136,7 @@ class DumpFileIterator(object):
                     box_dimensions['triclinic'] = True
 
             # xlo, xhi, xy
-            words = file.readline().split()
+            words = file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['xlo'] = float(words[0])
                 box_dimensions['xhi'] = float(words[1])
@@ -147,7 +147,7 @@ class DumpFileIterator(object):
                 box_dimensions['xy'] = float(words[2])
 
             # ylo, yhi, xz
-            words = file.readline().split()
+            words = file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['ylo'] = float(words[0])
                 box_dimensions['yhi'] = float(words[1])
@@ -158,7 +158,7 @@ class DumpFileIterator(object):
                 box_dimensions['xz'] = float(words[2])
 
             # zlo, zhi, yz
-            words = file.readline().split()
+            words = file.readline().split() #+1
             if len(words) == 2:
                 box_dimensions['zlo'] = float(words[0])
                 box_dimensions['zhi'] = float(words[1])
@@ -172,11 +172,11 @@ class DumpFileIterator(object):
 
             atoms: List[Atom] = []
             if snap['natoms']:
-                column_names = file.readline().split()[2:]
+                column_names = file.readline().split()[2:] #+1
 
                 for _ in range(0, snap['natoms']):
                     row = {}
-                    for cname, value in zip(column_names, file.readline().split()):
+                    for cname, value in zip(column_names, file.readline().split()): # +natoms times
                         row[cname] = float(value)
                     atom = parse_obj_as(Atom, row)
 
@@ -202,3 +202,43 @@ class DumpFileIterator(object):
                return snapshot
            else:
                raise StopIteration()
+
+class DumpCallback(object):
+    """
+    Base class used to build new callbacks that will be called as the dump file is parsed
+
+    Custom callbacks can be created by subclassing `DumpCallback` and override the method associated
+    with the stage of interest
+    """
+    def __init__(self):
+        pass
+
+    def on_snapshot_parse_begin(self, *args, **kwargs):
+        """
+        Method to be called right before a new snapshot is parsed
+        """
+        pass
+
+    def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
+        """
+        method called when the timestamp of a snapshot has been parsed
+        """
+        pass
+
+    def on_snapshot_parse_box(self, box: SimulationBox, *args, **kwargs):
+        """
+        Method called when the simulation box info is parsed
+        """
+        pass
+
+    def on_snapshot_parse_atoms(self, atoms: List[Atom], *args, **kwargs):
+        """
+        Method called when atoms coordinates are parsed from file
+        """
+        pass
+
+    def on_snapshot_parse_end(self, *args, **kwargs):
+        """
+        Method called when a snapshot has been completely parsed
+        """
+        pass
