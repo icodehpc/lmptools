@@ -1,11 +1,14 @@
 from __future__ import annotations
 import pandas as pd
 from .exceptions import SkipSnapshot
-from io import TextIOWrapper
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
 from typing import List, Optional
 from loguru import logger
+
+class DumpMetadata(BaseModel):
+    timestamp: int
+    natoms: int
 
 class SimulationBox(BaseModel):
     """
@@ -51,9 +54,8 @@ class DumpSnapshot(BaseModel):
     Generic class to represent a single lammps system snapshot.
     All the atom data is held in a pandas dataframe for easier processing
     """
-    timestamp: int
+    metadata: DumpMetadata
     box: SimulationBox
-    natoms: int
     atoms: List[Atom]
     unwrapped: bool = False
 
@@ -110,15 +112,9 @@ class DumpCallback(object):
         """
         pass
 
-    def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
+    def on_snapshot_parse_metadata(self, metadata: DumpMetadata, *args, **kwargs):
         """
-        method called when the timestamp of a snapshot has been parsed
-        """
-        pass
-
-    def on_snapshot_parse_natoms(self, natoms: int, *args, **kwargs):
-        """
-        Method invoked when the number of atoms is parsed from the dump file
+        Method invoked when metadata associated with the snapshot has been parsed
         """
         pass
 
@@ -157,132 +153,128 @@ class DumpFileIterator(object):
         """
         Read the dump file and return a single snapshot
         """
-        try:
-            # Invoke on_snapshot_parse_begin
-            if self.callback:
-                self.callback.on_snapshot_parse_begin()
+        # Invoke on_snapshot_parse_begin
+        if self.callback:
+            self.callback.on_snapshot_parse_begin()
             
-            snap: dict = {}
-            item = self.file.readline() # +1
-            # Readline with return an empty string if end of file is reached
-            if len(item) == 0:
-                return None
-            snap['timestamp'] = int(self.file.readline().split()[0]) #+1
-
-            # Invoke on_snapshot_parse_time
-            if self.callback:
-                self.callback.on_snapshot_parse_time(snap['timestamp'])
-
-            item = self.file.readline()
-            snap['natoms'] = int(self.file.readline()) #+1
-
-            # Invoke on_snapshot_parse_natoms
-            if self.callback:
-                self.callback.on_snapshot_parse_natoms(snap['natoms'])
-
-            item = self.file.readline() #+1
-            words = item.split("BOUNDS ")
-            # Simulation box periodicity (pp, ps ..)
-            box_periodicities = words[1].strip().split()
-
-             # Read in box dimensions
-            box_dimensions: dict = {}
-            box_dimensions['xprd'] = box_periodicities[0]
-            box_dimensions['yprd'] = box_periodicities[1]
-            box_dimensions['zprd'] = box_periodicities[2]
-            if len(words) == 1:
-                pass
-            else:
-                boxstr = words[1].strip()
-                if "xy" in boxstr:
-                    box_dimensions['triclinic'] = True
-
-            # xlo, xhi, xy
-            words = self.file.readline().split() #+1
-            if len(words) == 2:
-                box_dimensions['xlo'] = float(words[0])
-                box_dimensions['xhi'] = float(words[1])
-                box_dimensions['xy'] = 0.0
-            else:
-                box_dimensions['xlo'] = float(words[0])
-                box_dimensions['xhi'] = float(words[1])
-                box_dimensions['xy'] = float(words[2])
-
-            # ylo, yhi, xz
-            words = self.file.readline().split() #+1
-            if len(words) == 2:
-                box_dimensions['ylo'] = float(words[0])
-                box_dimensions['yhi'] = float(words[1])
-                box_dimensions['xz'] = 0.0
-            else:
-                box_dimensions['ylo'] = float(words[0])
-                box_dimensions['yhi'] = float(words[1])
-                box_dimensions['xz'] = float(words[2])
-
-            # zlo, zhi, yz
-            words = self.file.readline().split() #+1
-            if len(words) == 2:
-                box_dimensions['zlo'] = float(words[0])
-                box_dimensions['zhi'] = float(words[1])
-                box_dimensions['yz'] = 0.0
-            else:
-                box_dimensions['zlo'] = float(words[0])
-                box_dimensions['zhi'] = float(words[1])
-                box_dimensions['yz'] = float(words[2])
-
-            snap['box'] = SimulationBox(**box_dimensions)
-
-            # Invoke on_snapshot_parse_box
-            if self.callback:
-                self.callback.on_snapshot_parse_box(snap['box'])
-
-            atoms: List[Atom] = []
-            if snap['natoms']:
-                column_names = self.file.readline().split()[2:] #+1
-
-                for _ in range(0, snap['natoms']):
-                    row = {}
-                    for cname, value in zip(column_names, self.file.readline().split()): # +natoms times
-                        row[cname] = float(value)
-                    atom = parse_obj_as(Atom, row)
-
-                    # Unwrap coordinates
-                    if self.unwrap:
-                        atom.unwrap(snap['box'].Lx, snap['box'].Ly, snap['box'].Lz)
-                    atoms.append(atom)
-                snap['atoms'] = atoms
-
-                # Invoke on_snapshot_parse_atoms
-                if self.callback:
-                    self.callback.on_snapshot_parse_atoms(snap['atoms'])
-                
-                snapshot = parse_obj_as(DumpSnapshot, snap)
-
-                # Invoke on_snapshot_parse_end
-                if self.callback:
-                    self.callback.on_snapshot_parse_end(snapshot)
-            return snapshot
-
-        except SkipSnapshot as e:
-            logger.info(f"{e}")
+        snap: dict = {}
+        item = self.file.readline() # +1
+        # Readline with return an empty string if end of file is reached
+        if len(item) == 0:
             return None
+        snap['timestamp'] = int(self.file.readline().split()[0]) #+1
 
-        except Exception as e:
-            logger.error(e)
-            return None
+        # Invoke on_snapshot_parse_time
+        if self.callback:
+            self.callback.on_snapshot_parse_time(snap['timestamp'])
+
+        item = self.file.readline()
+        snap['natoms'] = int(self.file.readline()) #+1
+        # Invoke on_snapshot_parse_natoms
+        if self.callback:
+            self.callback.on_snapshot_parse_natoms(snap['natoms'])
+
+        item = self.file.readline() #+1
+        words = item.split("BOUNDS ")
+        # Simulation box periodicity (pp, ps ..)
+        box_periodicities = words[1].strip().split()
+
+        # Read in box dimensions
+        box_dimensions: dict = {}
+        box_dimensions['xprd'] = box_periodicities[0]
+        box_dimensions['yprd'] = box_periodicities[1]
+        box_dimensions['zprd'] = box_periodicities[2]
+        if len(words) == 1:
+            pass
+        else:
+            boxstr = words[1].strip()
+            if "xy" in boxstr:
+                box_dimensions['triclinic'] = True
+
+        # xlo, xhi, xy
+        words = self.file.readline().split() #+1
+        if len(words) == 2:
+            box_dimensions['xlo'] = float(words[0])
+            box_dimensions['xhi'] = float(words[1])
+            box_dimensions['xy'] = 0.0
+        else:
+            box_dimensions['xlo'] = float(words[0])
+            box_dimensions['xhi'] = float(words[1])
+            box_dimensions['xy'] = float(words[2])
+
+        # ylo, yhi, xz
+        words = self.file.readline().split() #+1
+        if len(words) == 2:
+            box_dimensions['ylo'] = float(words[0])
+            box_dimensions['yhi'] = float(words[1])
+            box_dimensions['xz'] = 0.0
+        else:
+            box_dimensions['ylo'] = float(words[0])
+            box_dimensions['yhi'] = float(words[1])
+            box_dimensions['xz'] = float(words[2])
+
+        # zlo, zhi, yz
+        words = self.file.readline().split() #+1
+        if len(words) == 2:
+            box_dimensions['zlo'] = float(words[0])
+            box_dimensions['zhi'] = float(words[1])
+            box_dimensions['yz'] = 0.0
+        else:
+            box_dimensions['zlo'] = float(words[0])
+            box_dimensions['zhi'] = float(words[1])
+            box_dimensions['yz'] = float(words[2])
+
+        snap['box'] = SimulationBox(**box_dimensions)
+
+        # Invoke on_snapshot_parse_box
+        if self.callback:
+            self.callback.on_snapshot_parse_box(snap['box'])
+
+        atoms: List[Atom] = []
+        if snap['natoms']:
+            column_names = self.file.readline().split()[2:] #+1
+            for _ in range(0, snap['natoms']):
+                row = {}
+                for cname, value in zip(column_names, self.file.readline().split()): # +natoms times
+                    row[cname] = float(value)
+                atom = parse_obj_as(Atom, row)
+                # Unwrap coordinates
+                if self.unwrap:
+                    atom.unwrap(snap['box'].Lx, snap['box'].Ly, snap['box'].Lz)
+                atoms.append(atom)
+
+            snap['atoms'] = atoms
+            snapshot = parse_obj_as(DumpSnapshot, snap)
+
+        # Invoke on_snapshot_parse_atoms
+        if self.callback:
+            self.callback.on_snapshot_parse_atoms(snap['atoms'])
+
+        # Invoke on_snapshot_parse_end
+        if self.callback:
+            self.callback.on_snapshot_parse_end(snapshot)
+        return snapshot
         
     def __iter__(self):
         return self
 
     def __next__(self) -> Optional[DumpSnapshot]:
         while True:
-           snapshot = self.read_snapshot()
-           if snapshot:
-               return snapshot
-           else:
-               raise StopIteration()
-
-
+            try:
+                snapshot = self.read_snapshot()
+                if snapshot:
+                    return snapshot
+                else:
+                    raise StopIteration
+            except SkipSnapshot as e:
+                logger.info(f"{e}")
+                for line in self.file:
+                    if not 'ITEM: TIMESTEP\n' in line:
+                        continue
+            except StopIteration as e:
+                raise StopIteration
+            except Exception as e:
+                logger.exception(f"{e}")
 class Dump:
     """
     Convenience wrapper around the DumpFileIterator class
@@ -302,4 +294,3 @@ class Dump:
         for snapshot in DumpFileIterator(dump_file_name=self._dump_file_name, unwrap=self._unwrap, callback=callback):
             if snapshot:
                 logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
-            continue
