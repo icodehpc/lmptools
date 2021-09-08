@@ -58,14 +58,16 @@ class DumpSnapshot(BaseModel):
     Generic class to represent a single lammps system snapshot.
     All the atom data is held in a pandas dataframe for easier processing
     """
-    metadata: Optional[DumpMetadata] = None
+    timestamp: Optional[int] = None
+    natoms: Optional[int] = None
+    # metadata: Optional[DumpMetadata] = None
     box: Optional[SimulationBox] = None
     atoms: Optional[List[Atom]] = None
     unwrapped: bool = False
 
     @validator('atoms')
     def num_atoms_must_match_natoms(cls, v: List[Atom], values: dict, **kwargs):
-        if len(v) != values['metadata'].natoms:
+        if len(v) != values['natoms']:
             raise AssertionError(f"Number of atoms read from file does not match {values['natoms']}")
         return v
 
@@ -76,9 +78,9 @@ class DumpSnapshot(BaseModel):
         """
         Check if snapshots match
         """
-        return all([self.metadata.timestamp == snapshot.metadata.timestamp,
+        return all([self.timestamp == snapshot.timestamp,
                     self.box == snapshot.box,
-                    self.metadata.natoms == snapshot.metadata.natoms])
+                    self.natoms == snapshot.natoms])
                 
     def __str__(self):
         timestep_header = "ITEM: TIMESTEP"
@@ -88,9 +90,9 @@ class DumpSnapshot(BaseModel):
         atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
         
         return f"{timestep_header}\n"+\
-                f"{self.metadata.timestamp}\n"+\
+                f"{self.timestamp}\n"+\
                 f"{num_atoms_header}\n"+\
-                f"{self.metadata.natoms}\n"+\
+                f"{self.natoms}\n"+\
                 f"{simbox_header}\n"+\
                 f"{str(self.box)}"+\
                 f"{atoms_header}\n"+\
@@ -158,7 +160,6 @@ class DumpFileIterator(object):
     """
     def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None):
         self.snapshot: Optional[DumpSnapshot] = None
-        self.snapshot_metadata: Optional[DumpMetadata] = None
         self.unwrap = unwrap
         self.callback = callback
         try:
@@ -181,22 +182,24 @@ class DumpFileIterator(object):
             self.snapshot = None
             return
         timestamp = int(self.file.readline().split()[0]) #+1
+        snap['timestamp'] = timestamp
 
         if self.callback:
             self.callback.on_snapshot_parse_timestamp(timestamp)
 
         item = self.file.readline()
         natoms = int(self.file.readline()) #+1
+        snap['natoms'] = natoms
 
         if self.callback:
             self.callback.on_snapshot_parse_natoms(natoms)
 
         # store snapshot metadata
-        self.snapshot_metadata = DumpMetadata(natoms = natoms, timestamp = timestamp)
-        snap['metadata'] = DumpMetadata(natoms = natoms, timestamp = timestamp)
+        #self.snapshot_metadata = DumpMetadata(natoms = natoms, timestamp = timestamp)
+        #snap['metadata'] = DumpMetadata(natoms = natoms, timestamp = timestamp)
 
-        if self.callback:
-            self.callback.on_snapshot_parse_metadata(snap['metadata'])
+        #if self.callback:
+        #    self.callback.on_snapshot_parse_metadata(snap['metadata'])
 
         item = self.file.readline() #+1
         words = item.split("BOUNDS ")
@@ -256,9 +259,9 @@ class DumpFileIterator(object):
             self.callback.on_snapshot_parse_box(snap['box'])
 
         atoms: List[Atom] = []
-        if self.snapshot_metadata.natoms:
+        if natoms:
             column_names = self.file.readline().split()[2:] #+1
-            for _ in range(0, self.snapshot_metadata.natoms):
+            for _ in range(0, natoms):
                 row = {}
                 for cname, value in zip(column_names, self.file.readline().split()): # +natoms times
                     row[cname] = float(value)
@@ -269,11 +272,12 @@ class DumpFileIterator(object):
                 atoms.append(atom)
 
             snap['atoms'] = atoms
-            self.snapshot = parse_obj_as(DumpSnapshot, snap)
+            # Invoke on_snapshot_parse_atoms
+            if self.callback:
+                self.callback.on_snapshot_parse_atoms(snap['atoms'])
 
-        # Invoke on_snapshot_parse_atoms
-        if self.callback:
-            self.callback.on_snapshot_parse_atoms(snap['atoms'])
+        # Create the snapshot    
+        self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_end
         if self.callback:
@@ -308,7 +312,6 @@ class Dump:
     Provides the parse method that will kick off parsing the entire dump file sequentially whilst taking in
     an instance of the DumpCallbacks for custom callback executions
     """
-
     def __init__(self, dump_file_name: str, unwrap: bool = False):
         self._unwrap = unwrap
         self._dump_file_name = dump_file_name
@@ -319,4 +322,4 @@ class Dump:
         """
         for snapshot in DumpFileIterator(dump_file_name=self._dump_file_name, unwrap=self._unwrap, callback=callback):
             if snapshot:
-                logger.info(f"Parsed snapshot for t = {snapshot.metadata}")
+                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
