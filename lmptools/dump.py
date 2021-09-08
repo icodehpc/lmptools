@@ -58,9 +58,9 @@ class DumpSnapshot(BaseModel):
     Generic class to represent a single lammps system snapshot.
     All the atom data is held in a pandas dataframe for easier processing
     """
-    metadata: DumpMetadata
-    box: SimulationBox
-    atoms: List[Atom]
+    metadata: Optional[DumpMetadata] = None
+    box: Optional[SimulationBox] = None
+    atoms: Optional[List[Atom]] = None
     unwrapped: bool = False
 
     @validator('atoms')
