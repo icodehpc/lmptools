@@ -62,17 +62,14 @@ class Atom(BaseModel):
         Unwrap the atom's coordinate based the image flags provided
         """
         self.unwrapped = True
-        if self.ix is not None:
-            self.x += self.ix*lx
-            self.xu = self.x
+        if self.ix is not None and self.x is not None:
+            self.xu = self.x + self.ix*lx
 
-        if self.iy is not None:
-            self.y += self.iy*ly
-            self.yu = self.y
+        if self.iy is not None and self.y is not None:
+            self.yu = self.y + self.iy*ly
 
-        if self.iz is not None:
-            self.z += self.iz*lz
-            self.zu = self.z
+        if self.iz is not None and self.z is not None:
+            self.zu = self.z + self.iz*lz
         return None
 
     @property

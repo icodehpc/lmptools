@@ -1,4 +1,5 @@
 from __future__ import annotations
+from os import times
 import pandas as pd
 from .exceptions import SkipSnapshot
 from pydantic import BaseModel, validator, parse_obj_as
@@ -9,6 +10,9 @@ from loguru import logger
 class DumpMetadata(BaseModel):
     timestamp: int
     natoms: int
+
+    def __str__(self):
+        return f"Timestamp: {self.timestamp}, Natoms: {self.natoms}"
 
 class SimulationBox(BaseModel):
     """
@@ -61,7 +65,7 @@ class DumpSnapshot(BaseModel):
 
     @validator('atoms')
     def num_atoms_must_match_natoms(cls, v: List[Atom], values: dict, **kwargs):
-        if len(v) != values['natoms']:
+        if len(v) != values['metadata'].natoms:
             raise AssertionError(f"Number of atoms read from file does not match {values['natoms']}")
         return v
 
@@ -72,9 +76,9 @@ class DumpSnapshot(BaseModel):
         """
         Check if snapshots match
         """
-        return all([self.timestamp == snapshot.timestamp,
+        return all([self.metadata.timestamp == snapshot.metadata.timestamp,
                     self.box == snapshot.box,
-                    self.natoms == snapshot.natoms])
+                    self.metadata.natoms == snapshot.metadata.natoms])
                 
     def __str__(self):
         timestep_header = "ITEM: TIMESTEP"
@@ -84,9 +88,9 @@ class DumpSnapshot(BaseModel):
         atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
         
         return f"{timestep_header}\n"+\
-                f"{self.timestamp}\n"+\
+                f"{self.metadata.timestamp}\n"+\
                 f"{num_atoms_header}\n"+\
-                f"{self.natoms}\n"+\
+                f"{self.metadata.natoms}\n"+\
                 f"{simbox_header}\n"+\
                 f"{str(self.box)}"+\
                 f"{atoms_header}\n"+\
@@ -109,6 +113,18 @@ class DumpCallback(object):
     def on_snapshot_parse_begin(self, *args, **kwargs):
         """
         Method to be called right before a new snapshot is parsed
+        """
+        pass
+
+    def on_snapshot_parse_timestamp(self, timestamp: int, *args, **kwargs):
+        """
+        method to be called right after the snapshot timestamp is parsed
+        """
+        pass
+
+    def on_snapshot_parse_natoms(self, natoms: int, *args, **kwargs):
+        """
+        Method to be called right after number of atoms in the snapshot is parsed
         """
         pass
 
@@ -136,12 +152,13 @@ class DumpCallback(object):
         """
         pass
 
-
 class DumpFileIterator(object):
     """
     base dumpfile iterator
     """
     def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None):
+        self.snapshot: Optional[DumpSnapshot] = None
+        self.snapshot_metadata: Optional[DumpMetadata] = None
         self.unwrap = unwrap
         self.callback = callback
         try:
@@ -149,7 +166,7 @@ class DumpFileIterator(object):
         except FileNotFoundError:
             logger.error(f"{dump_file_name} not found")
 
-    def read_snapshot(self) -> Optional[DumpSnapshot]:
+    def read_snapshot(self) -> None:
         """
         Read the dump file and return a single snapshot
         """
@@ -161,21 +178,29 @@ class DumpFileIterator(object):
         item = self.file.readline() # +1
         # Readline with return an empty string if end of file is reached
         if len(item) == 0:
-            return None
-        snap['timestamp'] = int(self.file.readline().split()[0]) #+1
+            self.snapshot = None
+            return
+        timestamp = int(self.file.readline().split()[0]) #+1
 
-        # Invoke on_snapshot_parse_time
         if self.callback:
-            self.callback.on_snapshot_parse_time(snap['timestamp'])
+            self.callback.on_snapshot_parse_timestamp(timestamp)
 
         item = self.file.readline()
-        snap['natoms'] = int(self.file.readline()) #+1
-        # Invoke on_snapshot_parse_natoms
+        natoms = int(self.file.readline()) #+1
+
         if self.callback:
-            self.callback.on_snapshot_parse_natoms(snap['natoms'])
+            self.callback.on_snapshot_parse_natoms(natoms)
+
+        # store snapshot metadata
+        self.snapshot_metadata = DumpMetadata(natoms = natoms, timestamp = timestamp)
+        snap['metadata'] = DumpMetadata(natoms = natoms, timestamp = timestamp)
+
+        if self.callback:
+            self.callback.on_snapshot_parse_metadata(snap['metadata'])
 
         item = self.file.readline() #+1
         words = item.split("BOUNDS ")
+
         # Simulation box periodicity (pp, ps ..)
         box_periodicities = words[1].strip().split()
 
@@ -231,9 +256,9 @@ class DumpFileIterator(object):
             self.callback.on_snapshot_parse_box(snap['box'])
 
         atoms: List[Atom] = []
-        if snap['natoms']:
+        if self.snapshot_metadata.natoms:
             column_names = self.file.readline().split()[2:] #+1
-            for _ in range(0, snap['natoms']):
+            for _ in range(0, self.snapshot_metadata.natoms):
                 row = {}
                 for cname, value in zip(column_names, self.file.readline().split()): # +natoms times
                     row[cname] = float(value)
@@ -244,7 +269,7 @@ class DumpFileIterator(object):
                 atoms.append(atom)
 
             snap['atoms'] = atoms
-            snapshot = parse_obj_as(DumpSnapshot, snap)
+            self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_atoms
         if self.callback:
@@ -252,8 +277,7 @@ class DumpFileIterator(object):
 
         # Invoke on_snapshot_parse_end
         if self.callback:
-            self.callback.on_snapshot_parse_end(snapshot)
-        return snapshot
+            self.callback.on_snapshot_parse_end(self.snapshot)
         
     def __iter__(self):
         return self
@@ -261,20 +285,22 @@ class DumpFileIterator(object):
     def __next__(self) -> Optional[DumpSnapshot]:
         while True:
             try:
-                snapshot = self.read_snapshot()
-                if snapshot:
-                    return snapshot
-                else:
+                self.read_snapshot()
+                if self.snapshot:
+                    return self.snapshot
+                elif self.snapshot is None:
                     raise StopIteration
             except SkipSnapshot as e:
                 logger.info(f"{e}")
-                for line in self.file:
-                    if not 'ITEM: TIMESTEP\n' in line:
-                        continue
+                # Skip the remaining lines until next line starting with ITEM: TIMESTAMP\n is read
+                while True:
+                    line = self.file.readline()
+                    if line == 'ITEM: TIMESTEP\n':
+                        cur_pos = self.file.tell()
+                        self.file.seek(cur_pos - len('ITEM: TIMESTEP\n'))
+                        break
             except StopIteration as e:
                 raise StopIteration
-            except Exception as e:
-                logger.exception(f"{e}")
 class Dump:
     """
     Convenience wrapper around the DumpFileIterator class
@@ -293,4 +319,4 @@ class Dump:
         """
         for snapshot in DumpFileIterator(dump_file_name=self._dump_file_name, unwrap=self._unwrap, callback=callback):
             if snapshot:
-                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
+                logger.info(f"Parsed snapshot for t = {snapshot.metadata}")

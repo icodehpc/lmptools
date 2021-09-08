@@ -1,3 +1,4 @@
+from lmptools.exceptions import SkipSnapshot
 import pytest
 import os
 import random
@@ -5,7 +6,19 @@ import pandas as pd
 from typing import List
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
-from lmptools import Dump, DumpFileIterator, DumpSnapshot, SimulationBox
+from lmptools import Dump, DumpFileIterator, DumpSnapshot, SimulationBox, DumpCallback, DumpMetadata
+
+class TestCallback(DumpCallback):
+    def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
+        print(f"timestamp: {timestamp} parsed")
+
+class SkipSnapshotCallback(DumpCallback):
+    """
+    This sample  callback will skip snapshot with timestamp less than 5000
+    """
+    def on_snapshot_parse_metadata(self, metadata: DumpMetadata):
+        if metadata.timestamp < 5000:
+            raise SkipSnapshot("skipping snapshot")
 
 @pytest.fixture(scope='session')
 def dump_file():
@@ -57,16 +70,10 @@ def dump_file():
                 atoms.append(atom)
                 f.write(" ".join([str(atom.__dict__[key]) for key in dump_colnames.split()])+"\n")
 
-            snapshots.append(DumpSnapshot(timestamp=timestep, box=box, natoms=num_atoms, atoms=atoms, unwrapped=False))
+            snapshots.append(DumpSnapshot(metadata=DumpMetadata(timestamp=timestep, natoms=num_atoms), box=box, atoms=atoms, unwrapped=False))
     f.close()
     yield {'filename': filename, 'snapshots': snapshots}
-
     os.remove("dump.test.lammpstrj")
-
-
-def test_dump_parse(dump_file):
-    d = Dump(dump_file['filename'])
-    d.parse()
 
 
 def test_dump_snapshot_parse(dump_file):
