@@ -1,18 +1,10 @@
 from __future__ import annotations
-from os import times
 import pandas as pd
 from .exceptions import SkipSnapshot
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
 from typing import List, Optional
 from loguru import logger
-
-class DumpMetadata(BaseModel):
-    timestamp: int
-    natoms: int
-
-    def __str__(self):
-        return f"Timestamp: {self.timestamp}, Natoms: {self.natoms}"
 
 class SimulationBox(BaseModel):
     """
@@ -60,7 +52,6 @@ class DumpSnapshot(BaseModel):
     """
     timestamp: Optional[int] = None
     natoms: Optional[int] = None
-    # metadata: Optional[DumpMetadata] = None
     box: Optional[SimulationBox] = None
     atoms: Optional[List[Atom]] = None
     unwrapped: bool = False
