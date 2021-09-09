@@ -1,4 +1,4 @@
-from lmptools import DumpFileIterator, DumpCallback, Dump, DumpMetadata
+from lmptools import DumpCallback, Dump
 from lmptools.exceptions import SkipSnapshot
 
 class MyCallback(DumpCallback):
@@ -7,5 +7,6 @@ class MyCallback(DumpCallback):
 			raise SkipSnapshot(f"Skipping snapshot")
 
 if __name__ == "__main__":
-	d = Dump("dump.test.lammpstrj", unwrap=True)
-	d.parse(callback=MyCallback())
+	d = Dump("dump.test.lammpstrj", unwrap=True, callback=MyCallback())
+	res = d.parse()
+	print(res)
