@@ -86,7 +86,7 @@ class DumpSnapshot(BaseModel):
         timestep_header = "ITEM: TIMESTEP"
         num_atoms_header = "ITEM: NUMBER OF ATOMS"
         simbox_header = f"ITEM: BOX BOUNDS {self.box.xprd} {self.box.yprd} {self.box.zprd}"
-        atoms_header = "ITEM: ATOMS "+" ".join([colname for colname in self.atoms[0].__fields_set__])
+        atoms_header = "ITEM: ATOMS "+" ".join(sorted([colname for colname in self.atoms[0].__fields_set__]))
         atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
 
         return f"{timestep_header}\n"+\
