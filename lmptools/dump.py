@@ -276,7 +276,7 @@ class Dump(object):
             snap['atoms'] = atoms
             # Invoke on_snapshot_parse_atoms callback
             if self.callback:
-                self.callback.on_snapshot_parse_atoms(snap['atoms'])
+                self.callback.on_snapshot_parse_atoms(atoms)
 
         # Create the snapshot    
         self.snapshot = parse_obj_as(DumpSnapshot, snap)
