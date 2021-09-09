@@ -305,6 +305,9 @@ class Dump(object):
                         cur_pos = self.file.tell()
                         self.file.seek(cur_pos - len('ITEM: TIMESTEP\n'))
                         break
+                    elif line == '':
+                        # EOF is reached
+                        break
             except StopIteration as e:
                 raise StopIteration
 
