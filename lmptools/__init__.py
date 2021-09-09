@@ -1,3 +1,3 @@
-from .dump import Dump, DumpFileIterator, DumpCallback, DumpSnapshot, SimulationBox, DumpMetadata
+from .dump import Dump, DumpCallback, DumpSnapshot, SimulationBox
 from .atom import Atom
 from .polymers import Polymer

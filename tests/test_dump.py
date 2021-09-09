@@ -6,7 +6,7 @@ import pandas as pd
 from typing import List
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
-from lmptools import Dump, DumpFileIterator, DumpSnapshot, SimulationBox, DumpCallback, DumpMetadata
+from lmptools import Dump, DumpSnapshot, SimulationBox, DumpCallback
 
 class TestCallback(DumpCallback):
     def on_snapshot_parse_time(self, timestamp: int, *args, **kwargs):
@@ -76,7 +76,13 @@ def dump_file():
     #os.remove("dump.test.lammpstrj")
 
 
-def test_dump_snapshot_parse(dump_file):
-    d = DumpFileIterator(dump_file['filename'])
+def test_dump_snapshot_parse_iteration(dump_file):
+    d = Dump(dump_file['filename'], unwrap=True)
     for index, snapshot in enumerate(d):
+        assert snapshot == dump_file['snapshots'][index]
+
+def test_dump_snapshot_parse_method(dump_file):
+    d = Dump(dump_file_name=dump_file['filename'], unwrap=True)
+    snapshots = d.parse()
+    for index, snapshot in enumerate(snapshots):
         assert snapshot == dump_file['snapshots'][index]

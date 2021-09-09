@@ -154,24 +154,31 @@ class DumpCallback(object):
         """
         pass
 
-class DumpFileIterator(object):
+class Dump(object):
     """
-    base dumpfile iterator
+    Base Dump class to parse LAMMPS dump files
     """
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None):
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, persist: bool = False):
         self.snapshot: Optional[DumpSnapshot] = None
+        self.dump_file_name = dump_file_name
         self.unwrap = unwrap
         self.callback = callback
+        self.persist = persist
+
+        if self.persist:
+            # Create SQL engine, tables and session
+            pass
+        
         try:
             self.file = open(dump_file_name)
         except FileNotFoundError:
             logger.error(f"{dump_file_name} not found")
 
-    def read_snapshot(self) -> None:
+    def parse_snapshot(self):
         """
         Read the dump file and return a single snapshot
         """
-        # Invoke on_snapshot_parse_begin
+        # Invoke on_snapshot_parse_begin callback
         if self.callback:
             self.callback.on_snapshot_parse_begin()
             
@@ -184,6 +191,7 @@ class DumpFileIterator(object):
         timestamp = int(self.file.readline().split()[0]) #+1
         snap['timestamp'] = timestamp
 
+        # Invoke on_snapshot_parse_timestamp callback
         if self.callback:
             self.callback.on_snapshot_parse_timestamp(timestamp)
 
@@ -191,15 +199,9 @@ class DumpFileIterator(object):
         natoms = int(self.file.readline()) #+1
         snap['natoms'] = natoms
 
+        # Invoke on_snapshot_parse_natoms callback
         if self.callback:
             self.callback.on_snapshot_parse_natoms(natoms)
-
-        # store snapshot metadata
-        #self.snapshot_metadata = DumpMetadata(natoms = natoms, timestamp = timestamp)
-        #snap['metadata'] = DumpMetadata(natoms = natoms, timestamp = timestamp)
-
-        #if self.callback:
-        #    self.callback.on_snapshot_parse_metadata(snap['metadata'])
 
         item = self.file.readline() #+1
         words = item.split("BOUNDS ")
@@ -254,7 +256,7 @@ class DumpFileIterator(object):
 
         snap['box'] = SimulationBox(**box_dimensions)
 
-        # Invoke on_snapshot_parse_box
+        # Invoke on_snapshot_parse_box callback
         if self.callback:
             self.callback.on_snapshot_parse_box(snap['box'])
 
@@ -272,31 +274,31 @@ class DumpFileIterator(object):
                 atoms.append(atom)
 
             snap['atoms'] = atoms
-            # Invoke on_snapshot_parse_atoms
+            # Invoke on_snapshot_parse_atoms callback
             if self.callback:
                 self.callback.on_snapshot_parse_atoms(snap['atoms'])
 
         # Create the snapshot    
         self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
-        # Invoke on_snapshot_parse_end
+        # Invoke on_snapshot_parse_end callback
         if self.callback:
             self.callback.on_snapshot_parse_end(self.snapshot)
-        
+
     def __iter__(self):
         return self
 
     def __next__(self) -> Optional[DumpSnapshot]:
         while True:
             try:
-                self.read_snapshot()
+                self.parse_snapshot()
                 if self.snapshot:
                     return self.snapshot
                 elif self.snapshot is None:
                     raise StopIteration
             except SkipSnapshot as e:
                 logger.info(f"{e}")
-                # Skip the remaining lines until next line starting with ITEM: TIMESTAMP\n is read
+                # Skip the remaining lines until next line starting with ITEM: TIMESTEP\n is read
                 while True:
                     line = self.file.readline()
                     if line == 'ITEM: TIMESTEP\n':
@@ -305,21 +307,27 @@ class DumpFileIterator(object):
                         break
             except StopIteration as e:
                 raise StopIteration
-class Dump:
-    """
-    Convenience wrapper around the DumpFileIterator class
 
-    Provides the parse method that will kick off parsing the entire dump file sequentially whilst taking in
-    an instance of the DumpCallbacks for custom callback executions
-    """
-    def __init__(self, dump_file_name: str, unwrap: bool = False):
-        self._unwrap = unwrap
-        self._dump_file_name = dump_file_name
-
-    def parse(self, callback: Optional[DumpCallback] = None) -> None:
+    def parse(self) -> Optional[List[DumpSnapshot]]:
         """
-        Method to parse the entire dump file from start to end
+        Method to parse all the snapshots and optionally persist in file/db
         """
-        for snapshot in DumpFileIterator(dump_file_name=self._dump_file_name, unwrap=self._unwrap, callback=callback):
+        all_parsed_snapshots: List[DumpSnapshot] = []
+        # run over the entire dump file and parse each snapshot
+        for snapshot in self:
             if snapshot:
-                logger.info(f"Parsed snapshot for t = {snapshot.timestamp}")
+                if self.persist:
+                    # Logic to write snapshot to sqlite backend db
+                    pass
+                else:
+                    all_parsed_snapshots.append(snapshot)
+        
+        if not self.persist:
+            return all_parsed_snapshots
+        else:
+            return None
+
+
+
+
+
