@@ -98,6 +98,17 @@ class DumpSnapshot(BaseModel):
                 f"{atoms_header}\n"+\
                 "\n".join(atoms)
 
+    def __add__(self, snapshot: DumpSnapshot):
+        """
+        Add atoms from `snapshot` with `self` while making sure that the timesteps are exactly the same
+        """
+        assert snapshot.timestamp == self.timestamp
+        assert snapshot.box == self.box
+        atoms = self.atoms + snapshot.atoms
+        unwrapped = True if self.unwrapped and snapshot.unwrapped else False
+        return DumpSnapshot(timestamp = self.timestamp, natoms = self.natoms + snapshot.natoms,
+                    box = self.box, atoms = atoms, unwrapped = unwrapped)
+
     @property
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame.from_dict([atom.dict(exclude_unset=True) for atom in self.atoms])
