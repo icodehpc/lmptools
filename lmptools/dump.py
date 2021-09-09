@@ -81,14 +81,14 @@ class DumpSnapshot(BaseModel):
         return all([self.timestamp == snapshot.timestamp,
                     self.box == snapshot.box,
                     self.natoms == snapshot.natoms])
-                
+
     def __str__(self):
         timestep_header = "ITEM: TIMESTEP"
         num_atoms_header = "ITEM: NUMBER OF ATOMS"
         simbox_header = f"ITEM: BOX BOUNDS {self.box.xprd} {self.box.yprd} {self.box.zprd}"
         atoms_header = "ITEM: ATOMS "+" ".join([colname for colname in self.atoms[0].__fields_set__])
         atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
-        
+
         return f"{timestep_header}\n"+\
                 f"{self.timestamp}\n"+\
                 f"{num_atoms_header}\n"+\
@@ -168,7 +168,7 @@ class Dump(object):
         if self.persist:
             # Create SQL engine, tables and session
             pass
-        
+
         try:
             self.file = open(dump_file_name)
         except FileNotFoundError:
@@ -181,7 +181,7 @@ class Dump(object):
         # Invoke on_snapshot_parse_begin callback
         if self.callback:
             self.callback.on_snapshot_parse_begin()
-            
+
         snap: dict = {}
         item = self.file.readline() # +1
         # Readline with return an empty string if end of file is reached
@@ -278,7 +278,7 @@ class Dump(object):
             if self.callback:
                 self.callback.on_snapshot_parse_atoms(atoms)
 
-        # Create the snapshot    
+        # Create the snapshot
         self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_end callback
@@ -321,7 +321,7 @@ class Dump(object):
                     pass
                 else:
                     all_parsed_snapshots.append(snapshot)
-        
+
         if not self.persist:
             return all_parsed_snapshots
         else:
