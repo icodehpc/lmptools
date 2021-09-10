@@ -77,7 +77,7 @@ class DumpSnapshot(BaseModel):
         timestep_header = "ITEM: TIMESTEP"
         num_atoms_header = "ITEM: NUMBER OF ATOMS"
         simbox_header = f"ITEM: BOX BOUNDS {self.box.xprd} {self.box.yprd} {self.box.zprd}"
-        atoms_header = "ITEM: ATOMS "+" ".join(sorted([colname for colname in self.atoms[0].__fields_set__]))
+        atoms_header = "ITEM: ATOMS "+" ".join(sorted([colname for colname in self.atoms[0].__fields_set__ if colname != 'unwrapped']))
         atoms = "\n".join([str(atom) for atom in self.atoms]).split('\n')
 
         return f"{timestep_header}\n"+\
@@ -313,26 +313,13 @@ class Dump(object):
             except StopIteration as e:
                 raise StopIteration
 
-    def parse(self) -> Optional[List[DumpSnapshot]]:
+    def parse(self, persist: bool = False) -> List[DumpSnapshot]:
         """
         Method to parse all the snapshots and optionally persist in file/db
         """
-        all_parsed_snapshots: List[DumpSnapshot] = []
         # run over the entire dump file and parse each snapshot
-        for snapshot in self:
-            if snapshot:
-                if self.persist:
-                    # Logic to write snapshot to sqlite backend db
-                    pass
-                else:
-                    all_parsed_snapshots.append(snapshot)
-
-        if not self.persist:
-            return all_parsed_snapshots
+        if persist:
+            return [snapshot for snapshot in self]
         else:
-            return None
-
-
-
-
-
+            for snapshot in self:
+                pass

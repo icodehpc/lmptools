@@ -52,7 +52,7 @@ class Atom(BaseModel):
     unwrapped: bool = False
 
     def __str__(self):
-        return " ".join([f"{self.__dict__[key]}" for key in sorted(list(self.__fields_set__))])
+        return " ".join([f"{self.__dict__[key]}" for key in sorted(list(self.__fields_set__)) if key != 'unwrapped'])
 
     def __eq__(self, other: Atom) -> bool:
         return all([self.__dict__[k] == other.__dict__[k] for k in self.__fields_set__])
