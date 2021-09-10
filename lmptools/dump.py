@@ -160,12 +160,13 @@ class Dump(object):
     """
     Base Dump class to parse LAMMPS dump files
     """
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, persist: bool = False):
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, persist: bool = False, verbose: bool = False):
         self.snapshot: Optional[DumpSnapshot] = None
         self.dump_file_name = dump_file_name
         self.unwrap = unwrap
         self.callback = callback
         self.persist = persist
+        self.log_verbosity = verbose
 
         if self.persist:
             # Create SQL engine, tables and session
@@ -299,7 +300,8 @@ class Dump(object):
                 elif self.snapshot is None:
                     raise StopIteration
             except SkipSnapshot as e:
-                logger.info(f"{e}")
+                if self.log_verbosity:
+                    logger.info(f"{e}")
                 # Skip the remaining lines until next line starting with ITEM: TIMESTEP\n is read
                 while True:
                     line = self.file.readline()
@@ -313,13 +315,14 @@ class Dump(object):
             except StopIteration as e:
                 raise StopIteration
 
-    def parse(self, persist: bool = False) -> List[DumpSnapshot]:
+    def parse(self) -> Optional[List[DumpSnapshot]]:
         """
         Method to parse all the snapshots and optionally persist in file/db
         """
         # run over the entire dump file and parse each snapshot
-        if persist:
+        if self.persist:
             return [snapshot for snapshot in self]
         else:
             for snapshot in self:
                 pass
+            return None
