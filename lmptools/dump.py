@@ -181,16 +181,17 @@ class Dump(object):
         """
         Read the dump file and return a single snapshot
         """
-        # Invoke on_snapshot_parse_begin callback
-        if self.callback:
-            self.callback.on_snapshot_parse_begin()
-
         snap: dict = {}
         item = self.file.readline() # +1
         # Readline with return an empty string if end of file is reached
         if len(item) == 0:
             self.snapshot = None
             return
+        
+        # Invoke on_snapshot_parse_begin callback
+        if self.callback:
+            self.callback.on_snapshot_parse_begin()
+
         timestamp = int(self.file.readline().split()[0]) #+1
         snap['timestamp'] = timestamp
 
