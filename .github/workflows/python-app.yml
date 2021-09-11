@@ -5,9 +5,13 @@ name: Python application
 
 on:
   push:
-    branches: [ dumpfile ]
+    branches:
+      - main
+      - testing
   pull_request:
-    branches: [ dumpfile ]
+    branches:
+      - main
+      - testing
 
 jobs:
   build:
