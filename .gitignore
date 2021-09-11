@@ -8,3 +8,4 @@ dist
 *.lammpstrj
 *.pdf
 *.png
+debug.py
