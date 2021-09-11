@@ -318,6 +318,6 @@ class Dump(object):
         if self.persist:
             return [snapshot for snapshot in self]
         else:
-            for snapshot in self:
+            for _ in self:
                 pass
             return None
