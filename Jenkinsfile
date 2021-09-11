@@ -5,7 +5,6 @@ pipeline {
         stage('Setup build environment') {
             steps {
                 echo "Installing poetry"
-                echo "which python"
             }
         }
     }
