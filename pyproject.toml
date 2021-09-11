@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lmptools"
-version = "0.1.0"
+version = "1.0.1"
 description = "Post processing toolkit for LAMMPS"
 authors = ["Venkat Bala <balavk89@gmail.com>"]
 license = "MIT"
