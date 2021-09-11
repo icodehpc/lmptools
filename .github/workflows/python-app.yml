@@ -42,7 +42,7 @@ jobs:
 
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.36.0
-      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+      if: github.event.pull_request.merged == true && github.ref == 'refs/head/main'
       env:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         WITH_V: true
