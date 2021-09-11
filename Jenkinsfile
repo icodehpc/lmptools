@@ -1,16 +1,11 @@
 pipeline {
     agent any
-
-    environment {
-        PATH = "/usr/local/tools/python/3.8.7/bin:${env.PATH}"
-    }
-    
     stages {
         stage('Setup build environment') {
             steps {
                 echo "Installing poetry"
-                sh "which curl"
-                sh "which python"
+                sh "curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3.8"
+                sh "$HOME/.poetry/bin/poetry install --no-root"
             }
         }
     }
