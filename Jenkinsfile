@@ -8,5 +8,10 @@ pipeline {
                 sh "$HOME/.poetry/bin/poetry install --no-root"
             }
         }
+        stage('Run tests') {
+            steps {
+                sh "$HOME/.poetry/bin/poetry run python3.8 -m pytest tests/*"
+            }
+        }
     }
 }
