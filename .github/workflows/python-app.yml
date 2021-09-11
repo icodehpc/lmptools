@@ -44,4 +44,5 @@ jobs:
         poetry run python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        source $HOME/.poetry/env
         poetry run python -m pytest tests/*
