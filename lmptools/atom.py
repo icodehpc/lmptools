@@ -2,7 +2,7 @@ from __future__ import annotations
 import math
 import pandas as pd
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class Vector(BaseModel):
     x: float

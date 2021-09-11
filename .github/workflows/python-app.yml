@@ -3,12 +3,15 @@ name: Python application
 on:
   push:
     branches:
-      - testing
-      - main
+      - feature/*
   pull_request:
     branches:
       - main
-      - testing
+    types:
+      - closed
+    paths-ignore:
+      - .github/workflows/*
+      - .gitignore
 
 jobs:
   build:
@@ -42,7 +45,7 @@ jobs:
 
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.36.0
-      if: github.event.pull_request.merged == true && github.ref == 'refs/head/main'
+      if: ${{ github.event.pull_request.merged }}
       env:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         WITH_V: true

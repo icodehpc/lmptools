@@ -1,10 +1,16 @@
-from lmptools.exceptions import SkipSnapshot
 import pytest
 import os
+import itertools
 import random
 from typing import List
+
+from sqlalchemy.sql.sqltypes import Time
+from lmptools.exceptions import SkipSnapshot
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from lmptools.sql_models import AtomModel, SimulationBoxModel, SimulationModel, TimestepModel
 from lmptools import Dump, DumpSnapshot, SimulationBox, DumpCallback
 
 class SkipSnapshotCallback(DumpCallback):
@@ -179,7 +185,6 @@ def test_dump_callback_on_snapshot_parse_atoms(dump_file):
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.atoms[index] == snapshot.atoms
 
-
 def test_dump_callback_on_snapshot_parse_end(dump_file):
     """
     Assert on_snapshot_parse_end is called
@@ -193,6 +198,48 @@ def test_dump_callback_on_snapshot_parse_end(dump_file):
     
 def test_dump_skip_snapshot(dump_file):
     cb = SkipSnapshotCallback()
-    d = Dump(dump_file['filename'], callback=cb, persist=True)
-    snapshots = d.parse()
+    d = Dump(dump_file['filename'], callback=cb)
+    snapshots = d.parse(persist=True)
     assert snapshots == []
+
+# Test snapshot persistence
+def test_dump_snapshot_sqlitedb_creation(dump_file):
+    d = Dump(dump_file_name=dump_file['filename'])
+    d.to_sql(simulation_id=1, sql_connection_str='sqlite:///test.db')
+    assert os.path.exists('test.db') == True
+    os.remove('test.db')
+
+def test_dump_snapshot_persist_simulation_model(dump_file):
+    d = Dump(dump_file_name=dump_file['filename'])
+    d.to_sql(simulation_id=1, sql_connection_str='sqlite:///test.db')
+
+    # Assert
+    engine = create_engine('sqlite:///test.db', echo=False)
+    session = Session(bind=engine)
+    assert session.query(SimulationModel.id).first()[0] == 1
+    os.remove('test.db')
+
+def test_dump_snapshot_persist_simulation_timestep(dump_file):
+    sql_conn_str = 'sqlite:///test.db'
+    d = Dump(dump_file_name=dump_file['filename'])
+    d.to_sql(simulation_id=1, sql_connection_str=sql_conn_str)
+
+    # Assert
+    engine = create_engine(sql_conn_str, echo=False)
+    session = Session(bind=engine)
+    for snapshot in dump_file['snapshots']:
+        assert session.query(TimestepModel).filter(TimestepModel.timestep == snapshot.timestamp).first() != None
+    os.remove('test.db')
+
+def test_dump_snapshot_persist_atoms(dump_file):
+    sql_conn_str = 'sqlite:///test.db'
+    d = Dump(dump_file_name=dump_file['filename'])
+    d.to_sql(simulation_id=1, sql_connection_str=sql_conn_str)
+
+    engine = create_engine(sql_conn_str, echo=False)
+    session = Session(bind=engine)
+
+    for snapshot in dump_file['snapshots']:
+        for atom in snapshot.atoms:
+            assert session.query(AtomModel).filter(AtomModel.id == atom.id).first() != None
+    os.remove('test.db')

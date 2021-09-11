@@ -9,3 +9,4 @@ dist
 *.pdf
 *.png
 debug.py
+*.db
