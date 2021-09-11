@@ -9,6 +9,7 @@ pipeline {
         stage('Setup build environment') {
             steps {
                 echo "Installing poetry"
+                sh "which curl"
                 sh "which python"
             }
         }
