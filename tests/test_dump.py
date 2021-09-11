@@ -73,16 +73,10 @@ def dump_file():
             snapshots.append(DumpSnapshot(timestamp=timestep, natoms=num_atoms, box=box, atoms=atoms, unwrapped=False))
     f.close()
     yield {'filename': filename, 'snapshots': snapshots}
-    #os.remove("dump.test.lammpstrj")
+    os.remove("dump.test.lammpstrj")
 
 
 def test_dump_snapshot_parse_iteration(dump_file):
     d = Dump(dump_file['filename'], unwrap=True)
     for index, snapshot in enumerate(d):
-        assert snapshot == dump_file['snapshots'][index]
-
-def test_dump_snapshot_parse_method(dump_file):
-    d = Dump(dump_file_name=dump_file['filename'], unwrap=True)
-    snapshots = d.parse()
-    for index, snapshot in enumerate(snapshots):
         assert snapshot == dump_file['snapshots'][index]
