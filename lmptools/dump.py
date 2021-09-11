@@ -132,12 +132,6 @@ class DumpCallback(object):
         """
         pass
 
-    def on_snapshot_parse_metadata(self, metadata: DumpMetadata, *args, **kwargs):
-        """
-        Method invoked when metadata associated with the snapshot has been parsed
-        """
-        pass
-
     def on_snapshot_parse_box(self, box: SimulationBox, *args, **kwargs):
         """
         Method called when the simulation box info is parsed
