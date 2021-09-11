@@ -3,9 +3,7 @@ name: Python application
 on:
   push:
     branches:
-      - main
       - testing
-      - dumpfile
   pull_request:
     branches:
       - main
@@ -13,15 +11,14 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
     - name: Install dependencies
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
@@ -29,6 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -36,12 +34,16 @@ jobs:
 
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
     - name: Test with pytest
       run: |
         python -m pytest tests/*
 
-    - name: Build package
-      run: |
-        source $HOME/.poetry/env
-        poetry build
-
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.36.0
+      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        WITH_V: true
+        RELEASE_BRANCHES: main
+        INITIAL_VERSION: 0.0.0
