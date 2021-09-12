@@ -10,6 +10,9 @@ on:
       - main
     types:
       - closed
+    paths-ignore:
+      - .github/workflows/*
+      - .gitignore
 
 jobs:
   build:
