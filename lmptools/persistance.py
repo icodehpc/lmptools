@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 from loguru import logger
+from abc import ABC, abstractmethod
 from typing import List
 from lmptools import DumpSnapshot
 from sqlalchemy import create_engine
@@ -7,16 +7,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, ForeignKey, Float, String, Boolean
 from sqlalchemy.orm import declarative_base, relationship
 
-Base = declarative_base()
+from lmptools.dump import DumpCallback
 
-class SnapshotWriter(ABC):
-    """
-    Abstract class to template a dump file snapshot writer. Different writers need to implement
-    all the abstract methods of this class in order to be classified as a `SnapshotWriter`
-    """
-    @abstractmethod
-    def write(snapshot: DumpSnapshot):
-        pass
+Base = declarative_base()
 
 # Create the SQLAlchemy db models for saving snapshots to database
 class SimulationModel(Base):
@@ -116,10 +109,17 @@ class AtomModel(Base):
     iy = Column(Integer, nullable=True)
     iz = Column(Integer, nullable=True)
 
-class SqliteWriter(SnapshotWriter):
+
+class SnapshotWriter(ABC, DumpCallback):
+    @abstractmethod
+    def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
+        pass
+
+class Sqlite(SnapshotWriter):
     """
-    SQLite writer to insert parsed snapshots into a sqlite database
-    db_name: str default to snapshots.db
+    Special callback to insert snapshot into a sqlite database
+
+    Overrides the on_snapshot_parse_end method to insert the snapshot into database
     """
     def __init__(self, simulation_id: int, db_name: str = "snapshots.db", debug: bool = False):
         self.__db_name = db_name
@@ -129,7 +129,7 @@ class SqliteWriter(SnapshotWriter):
         self.__simulation_id = simulation_id
         self.__debug = debug
 
-    def write(self, snapshot: DumpSnapshot):
+    def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
         # Create simulation
         sim = SimulationModel(id = self.__simulation_id)
         try:
