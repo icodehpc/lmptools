@@ -18,7 +18,6 @@ class SnapshotWriter(ABC):
     def write(snapshot: DumpSnapshot):
         pass
 
-
 # Create the SQLAlchemy db models for saving snapshots to database
 class SimulationModel(Base):
     """
@@ -117,7 +116,7 @@ class AtomModel(Base):
     iy = Column(Integer, nullable=True)
     iz = Column(Integer, nullable=True)
 
-class SQLiteWriter(SnapshotWriter):
+class SqliteWriter(SnapshotWriter):
     """
     SQLite writer to insert parsed snapshots into a sqlite database
     db_name: str default to snapshots.db
