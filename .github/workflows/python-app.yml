@@ -2,13 +2,9 @@ name: Python application
 
 on:
   push:
-    branches:
-      - feature/*
   pull_request:
     branches:
       - main
-    types:
-      - closed
     paths-ignore:
       - .github/workflows/*
       - .gitignore
