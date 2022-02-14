@@ -318,6 +318,7 @@ class Dump(object):
         if self.persist:
             return [snapshot for snapshot in self]
         else:
+            # Iterate over self while invoking the callbacks if provided
             for _ in self:
                 pass
             return None
