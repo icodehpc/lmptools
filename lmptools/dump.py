@@ -1,17 +1,10 @@
 from __future__ import annotations
 import pandas as pd
-import time
-import numpy as np
 from .exceptions import SkipSnapshot
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
 from typing import List, Optional
 from loguru import logger
-from sqlalchemy.engine import Engine, create_engine
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-from .sql_models import AtomModel, SimulationBoxModel, SimulationModel, TimestepModel
-from .sql_models import Base
 
 class SimulationBox(BaseModel):
     """
@@ -161,8 +154,7 @@ class Dump(object):
     """
     Base Dump class to parse LAMMPS dump files
     """
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None,
-        persist: bool = False, verbose: bool = False):
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, verbose: bool = False):
         self.snapshot: Optional[DumpSnapshot] = None
         self.dump_file_name = dump_file_name
         self.unwrap = unwrap
@@ -313,70 +305,11 @@ class Dump(object):
             except StopIteration as e:
                 raise StopIteration
 
-    def parse(self, persist: bool = False) -> Optional[List[DumpSnapshot]]:
+    def parse(self) -> None:
         """
         Method to parse all the snapshots and optionally persist in file/db
         """
-        if persist:
-            return [snapshot for snapshot in self]
-        else:
-            # Iterate over self while invoking the callbacks if provided
-            for _ in self:
-                pass
-            return None
-
-    def to_sql(self, simulation_id: int, sql_connection_str: str = 'sqlite://') -> None:
-        """
-        Dump the snapshots to the database referenced by the connection string
-        database defaults to an in memory sqlite database
-        """
-        engine = create_engine(sql_connection_str, echo=False)
-        session = Session(bind=engine)
-        Base.metadata.create_all(bind=engine)
-
-        sim = SimulationModel(id = simulation_id)
-        try:
-            session.add(sim)
-            session.commit()
-        except Exception:
-            session.rollback()
-
-        for snapshot in self:
-            start = time.time()
-
-            # Add the simulation timestep
-            timestep = TimestepModel(timestep = snapshot.timestamp, simulation = sim)
-            try:
-                session.add(timestep)
-                session.commit()
-            except Exception:
-                session.rollback()
-
-            # Insert simulation box info into DB
-            sbox = SimulationBoxModel(simulation = sim, timestep = timestep)
-            for field in snapshot.box.__fields_set__:
-                sbox.__dict__[field] = snapshot.box.__dict__[field]
-            
-            try:
-                session.add(sbox)
-                session.commit()
-            except Exception:
-                session.rollback()
-
-            # Insert atoms
-            atom_models: List[AtomModel] = []
-            for atom in snapshot.atoms:
-                atom_model = AtomModel(simulation = sim, timestep = timestep)
-                for field in atom.__fields_set__:
-                    atom_model.__dict__[field] = atom.__dict__[field]
-                atom_models.append(atom_model)
-            
-            try:
-                session.bulk_save_objects(atom_models, return_defaults=True)
-                session.commit()
-            except Exception as e:
-                logger.exception(e)
-
-            end = time.time()
-            if self.verbose:
-                logger.info(f"Snapshot {snapshot.timestamp} inserted in {end-start} seconds")
+        # Iterate over self while invoking the callbacks if provided
+        for _ in self:
+            pass
+        return None
