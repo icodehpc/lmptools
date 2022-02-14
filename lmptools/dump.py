@@ -154,11 +154,11 @@ class Dump(object):
     """
     Base Dump class to parse LAMMPS dump files
     """
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, verbose: bool = False):
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callbacks: Optional[List[DumpCallback]] = None, verbose: bool = False):
         self.snapshot: Optional[DumpSnapshot] = None
         self.dump_file_name = dump_file_name
         self.unwrap = unwrap
-        self.callback = callback
+        self.callbacks = callbacks
         self.verbose = verbose
 
         try:
@@ -178,23 +178,26 @@ class Dump(object):
             return
         
         # Invoke on_snapshot_parse_begin callback
-        if self.callback:
-            self.callback.on_snapshot_parse_begin()
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_begin()
 
         timestamp = int(self.file.readline().split()[0]) #+1
         snap['timestamp'] = timestamp
 
         # Invoke on_snapshot_parse_timestamp callback
-        if self.callback:
-            self.callback.on_snapshot_parse_timestamp(timestamp)
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_timestamp(timestamp)
 
         item = self.file.readline()
         natoms = int(self.file.readline()) #+1
         snap['natoms'] = natoms
 
         # Invoke on_snapshot_parse_natoms callback
-        if self.callback:
-            self.callback.on_snapshot_parse_natoms(natoms)
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_natoms(natoms)
 
         item = self.file.readline() #+1
         words = item.split("BOUNDS ")
@@ -250,8 +253,9 @@ class Dump(object):
         snap['box'] = SimulationBox(**box_dimensions)
 
         # Invoke on_snapshot_parse_box callback
-        if self.callback:
-            self.callback.on_snapshot_parse_box(snap['box'])
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_box(snap['box'])
 
         atoms: List[Atom] = []
         if natoms:
@@ -268,15 +272,17 @@ class Dump(object):
 
             snap['atoms'] = atoms
             # Invoke on_snapshot_parse_atoms callback
-            if self.callback:
-                self.callback.on_snapshot_parse_atoms(atoms)
+            if self.callbacks:
+                for callback in self.callbacks:
+                    callback.on_snapshot_parse_atoms(atoms)
 
         # Create the snapshot
         self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_end callback
-        if self.callback:
-            self.callback.on_snapshot_parse_end(self.snapshot)
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_end(self.snapshot)
 
     def __iter__(self):
         return self
