@@ -8,9 +8,6 @@ from sqlalchemy.sql.sqltypes import Time
 from lmptools.exceptions import SkipSnapshot
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from lmptools.sql_models import AtomModel, SimulationBoxModel, SimulationModel, TimestepModel
 from lmptools import Dump, DumpSnapshot, SimulationBox, DumpCallback
 
 class SkipSnapshotCallback(DumpCallback):
@@ -137,109 +134,132 @@ def test_dump_callback_on_snapshot_begin_parse(dump_file):
     Test whether the on snapshot parse begin callback has been invoked
     """
     cb = OnSnapshotParseBegin()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=cb)
     d.parse()
     assert cb.num_snapshots == len(dump_file['snapshots'])
+
+def test_dump_callback_on_snapshot_begin_parse_callback_converted_to_list(dump_file):
+    cb = OnSnapshotParseBegin()
+    d = Dump(dump_file['filename'], callbacks=[cb])
+    d.parse()
+    assert cb.num_snapshots == len(dump_file['snapshots'])
+
+def test_dump_callbacks_on_snapshot_begin_parse(dump_file):
+    cb = [OnSnapshotParseBegin() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
+    assert all([c.num_snapshots == len(dump_file['snapshots']) for c in cb])
+
 
 def test_dump_callback_on_snapshot_parse_timestamp(dump_file):
     """
     Test whether on_snapshot_parse_atoms callback has been invoked
     """
     cb = OnSnapshotParseTimestamp()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=[cb])
     d.parse()
 
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.timestamps[index] == snapshot.timestamp
+
+def test_dump_callbacks_on_snapshot_parse_timestamp(dump_file):
+    """
+    Test whether on_snapshot_parse_atoms callbacks has been invoked when a list of callbacks are provided
+    """
+    cb = [OnSnapshotParseTimestamp() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
+    for c in cb:
+        for index, snapshot in enumerate(dump_file['snapshots']):
+            assert c.timestamps[index] == snapshot.timestamp
 
 def test_dump_callback_on_snapshot_parse_natoms(dump_file):
     """
     Test whether on_snapshot_parse_atoms callback has been invoked
     """
     cb = OnSnapshotParseNatoms()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=[cb])
     d.parse()
 
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.natoms[index] == snapshot.natoms
+
+def test_dump_callbacks_on_snapshot_parse_natoms(dump_file):
+    """
+    Test whether on_snapshot_parse_atoms callbacks has been invoked when a list of callbacks are given
+    """
+    cb = [OnSnapshotParseNatoms() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
+
+    for c in cb:
+        for index, snapshot in enumerate(dump_file['snapshots']):
+            assert c.natoms[index] == snapshot.natoms
 
 def test_dump_callback_on_snapshot_parse_box(dump_file):
     """
     Assert that on_snapshot_parse_box callback is called
     """
     cb = OnSnapshotParseBox()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=[cb])
     d.parse()
 
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.simulation_box[index] == snapshot.box
+
+def test_dump_callbacks_on_snapshot_parse_box(dump_file):
+    """
+    Assert that on_snapshot_parse_box callback is called when list of callbacks is passed
+    """
+    cb = [OnSnapshotParseBox() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
+    for c in cb:
+        for index, snapshot in enumerate(dump_file['snapshots']):
+            assert c.simulation_box[index] == snapshot.box
 
 def test_dump_callback_on_snapshot_parse_atoms(dump_file):
     """
     assert on_snapshot_parse_atoms is called
     """
     cb = OnSnapshotParseAtoms()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=[cb])
     d.parse()
 
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.atoms[index] == snapshot.atoms
+
+def test_dump_callbacks_on_snapshot_parse_atoms(dump_file):
+    """
+    assert on_snapshot_parse_atoms is called for a list of callbacks
+    """
+    cb = [OnSnapshotParseAtoms() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
+
+    for c in cb:
+        for index, snapshot in enumerate(dump_file['snapshots']):
+            assert c.atoms[index] == snapshot.atoms
 
 def test_dump_callback_on_snapshot_parse_end(dump_file):
     """
     Assert on_snapshot_parse_end is called
     """
     cb = OnSnapshotParseEnd()
-    d = Dump(dump_file['filename'], callback=cb)
+    d = Dump(dump_file['filename'], callbacks=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file['snapshots']):
         assert cb.snapshots[index] == snapshot
-    
-def test_dump_skip_snapshot(dump_file):
-    cb = SkipSnapshotCallback()
-    d = Dump(dump_file['filename'], callback=cb)
-    snapshots = d.parse(persist=True)
-    assert snapshots == []
 
-# Test snapshot persistence
-def test_dump_snapshot_sqlitedb_creation(dump_file):
-    d = Dump(dump_file_name=dump_file['filename'])
-    d.to_sql(simulation_id=1, sql_connection_str='sqlite:///test.db')
-    assert os.path.exists('test.db') == True
-    os.remove('test.db')
+def test_dump_callbacks_on_snapshot_parse_end(dump_file):
+    """
+    Assert on_snapshot_parse_end is called when list of callbacks is passed
+    """
+    cb = [OnSnapshotParseEnd() for i in range(5)]
+    d = Dump(dump_file['filename'], callbacks=cb)
+    d.parse()
 
-def test_dump_snapshot_persist_simulation_model(dump_file):
-    d = Dump(dump_file_name=dump_file['filename'])
-    d.to_sql(simulation_id=1, sql_connection_str='sqlite:///test.db')
-
-    # Assert
-    engine = create_engine('sqlite:///test.db', echo=False)
-    session = Session(bind=engine)
-    assert session.query(SimulationModel.id).first()[0] == 1
-    os.remove('test.db')
-
-def test_dump_snapshot_persist_simulation_timestep(dump_file):
-    sql_conn_str = 'sqlite:///test.db'
-    d = Dump(dump_file_name=dump_file['filename'])
-    d.to_sql(simulation_id=1, sql_connection_str=sql_conn_str)
-
-    # Assert
-    engine = create_engine(sql_conn_str, echo=False)
-    session = Session(bind=engine)
-    for snapshot in dump_file['snapshots']:
-        assert session.query(TimestepModel).filter(TimestepModel.timestep == snapshot.timestamp).first() != None
-    os.remove('test.db')
-
-def test_dump_snapshot_persist_atoms(dump_file):
-    sql_conn_str = 'sqlite:///test.db'
-    d = Dump(dump_file_name=dump_file['filename'])
-    d.to_sql(simulation_id=1, sql_connection_str=sql_conn_str)
-
-    engine = create_engine(sql_conn_str, echo=False)
-    session = Session(bind=engine)
-
-    for snapshot in dump_file['snapshots']:
-        for atom in snapshot.atoms:
-            assert session.query(AtomModel).filter(AtomModel.id == atom.id).first() != None
-    os.remove('test.db')
+    for c in cb:
+        for index, snapshot in enumerate(dump_file['snapshots']):
+            assert c.snapshots[index] == snapshot
