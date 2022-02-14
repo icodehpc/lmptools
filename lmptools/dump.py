@@ -161,12 +161,8 @@ class Dump(object):
     """
     Base Dump class to parse LAMMPS dump files
     """
-<<<<<<< HEAD
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, verbose: bool = False):
-=======
     def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None,
         persist: bool = False, verbose: bool = False):
->>>>>>> dumpfile
         self.snapshot: Optional[DumpSnapshot] = None
         self.dump_file_name = dump_file_name
         self.unwrap = unwrap
