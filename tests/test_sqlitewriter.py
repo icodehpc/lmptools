@@ -1,15 +1,14 @@
-from lmptools.sql_models import AtomModel, Base, SimulationModel, TimestepModel, SimulationBoxModel
-from lmptools.dump import DumpSnapshot, SimulationBox
-from lmptools.atom import Atom
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from typing import List
-from pydantic import parse_obj_as
-import numpy as np
+import os
+from subprocess import call
 import pytest
 import random
-import os
-
+from typing import List
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine
+from lmptools import Atom
+from pydantic import parse_obj_as
+from lmptools.persistance import Base, SimulationModel, SqliteWriter, TimestepModel, SimulationBoxModel, AtomModel
+from lmptools import Dump, DumpSnapshot, SimulationBox, DumpCallback
 
 @pytest.fixture
 def sql_session():
@@ -23,7 +22,7 @@ def sql_session():
     engine.dispose()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def dump_file():
     # Create a dump file
     filename = "dump.test.lammpstrj"
@@ -76,13 +75,14 @@ def dump_file():
             snapshots.append(DumpSnapshot(timestamp=timestep, natoms=num_atoms, box=box, atoms=atoms, unwrapped=False))
     f.close()
     yield {'filename': filename, 'snapshots': snapshots}
-    os.remove("dump.test.lammpstrj")
+    os.remove(filename)
 
 def test_create_simulation(sql_session):
     sim1 = SimulationModel(id = 1)
     sim2 = SimulationModel(id = 2)
     sql_session.add(sim1)
     sql_session.add(sim2)
+    sql_session.commit()
 
     # Query db for a simulation
     num_simulations = sql_session.query(SimulationModel).count()
@@ -123,3 +123,34 @@ def test_create_simulation_timestep_box_molecule_and_atom(sql_session):
 
     res = sql_session.query(AtomModel).one()
     assert res.type == 1 and res.x == 0.1 and res.y == 0.2 and res.z == 0.3
+
+
+# Test snapshot persistence
+def test_dump_snapshot_sqlitedb_creation(dump_file):
+    d = Dump(dump_file_name=dump_file['filename'], callbacks=SqliteWriter(simulation_id = 1, db_name = "test.db"))
+    assert os.path.exists('test.db') == True
+    os.remove('test.db')
+
+def test_dump_snapshot_persist_simulation_model(dump_file):
+    cb = SqliteWriter(simulation_id = 1, db_name = "test.db")
+    d = Dump(dump_file_name=dump_file['filename'], callbacks = cb)
+    d.parse()
+
+    # Assert
+    engine = create_engine('sqlite:///test.db', echo=False)
+    session = Session(bind=engine)
+    assert session.query(SimulationModel.id).first()[0] == 1
+    os.remove('test.db')
+
+def test_dump_snapshot_persist_simulation_timestep(dump_file):
+    cb = SqliteWriter(simulation_id = 1, db_name = "test.db", debug=False)
+    d = Dump(dump_file_name=dump_file['filename'], callbacks = cb)
+    d.parse()
+
+    # Assert
+    engine = create_engine("sqlite:///test.db", echo=False)
+    session = Session(bind=engine)
+    for snapshot in dump_file['snapshots']:
+        res = session.query(TimestepModel.timestep).filter(TimestepModel.timestep == snapshot.timestamp).scalar()
+        assert res == snapshot.timestamp
+    os.remove('test.db')

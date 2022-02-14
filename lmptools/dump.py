@@ -1,17 +1,10 @@
 from __future__ import annotations
 import pandas as pd
-import time
-import numpy as np
 from .exceptions import SkipSnapshot
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
-from typing import List, Optional
+from typing import List, Optional, Union
 from loguru import logger
-from sqlalchemy.engine import Engine, create_engine
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-from .sql_models import AtomModel, SimulationBoxModel, SimulationModel, TimestepModel
-from .sql_models import Base
 
 class SimulationBox(BaseModel):
     """
@@ -157,20 +150,57 @@ class DumpCallback(object):
         """
         pass
 
+
+class CallbackList(DumpCallback):
+    """
+    Container to wrap multiple callbacks. Provides a cleaner interface to invoke the callback hooks
+    by invoking the function just once
+    """
+    def __init__(self, callbacks = None):
+        self.callbacks = callbacks
+        # If only a single instance is provided, wrap it as a list
+        if isinstance(callbacks, DumpCallback):
+            self.callbacks = [callbacks]
+
+    def on_snapshot_parse_begin(self, *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_begin(*args, **kwargs)
+
+    def on_snapshot_parse_timestamp(self, timestamp: int, *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_timestamp(timestamp, *args, **kwargs)
+
+    def on_snapshot_parse_natoms(self, natoms: int, *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_natoms(natoms, *args, **kwargs)
+
+    def on_snapshot_parse_box(self, box: SimulationBox, *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_box(box, *args, **kwargs)
+
+    def on_snapshot_parse_atoms(self, atoms: List[Atom], *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_atoms(atoms, *args, **kwargs)
+
+    def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
+        if self.callbacks:
+            for callback in self.callbacks:
+                callback.on_snapshot_parse_end(snapshot, *args, **kwargs)
+
 class Dump(object):
     """
     Base Dump class to parse LAMMPS dump files
     """
-<<<<<<< HEAD
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None, verbose: bool = False):
-=======
-    def __init__(self, dump_file_name: str, unwrap: bool = False, callback: Optional[DumpCallback] = None,
-        persist: bool = False, verbose: bool = False):
->>>>>>> dumpfile
+    def __init__(self, dump_file_name: str, unwrap: bool = False, callbacks: Optional[List[DumpCallback]] = None, verbose: bool = False):
         self.snapshot: Optional[DumpSnapshot] = None
         self.dump_file_name = dump_file_name
         self.unwrap = unwrap
-        self.callback = callback
+        self.callbacks = CallbackList(callbacks=callbacks)
         self.verbose = verbose
 
         try:
@@ -190,23 +220,20 @@ class Dump(object):
             return
         
         # Invoke on_snapshot_parse_begin callback
-        if self.callback:
-            self.callback.on_snapshot_parse_begin()
+        self.callbacks.on_snapshot_parse_begin()
 
         timestamp = int(self.file.readline().split()[0]) #+1
         snap['timestamp'] = timestamp
 
         # Invoke on_snapshot_parse_timestamp callback
-        if self.callback:
-            self.callback.on_snapshot_parse_timestamp(timestamp)
+        self.callbacks.on_snapshot_parse_timestamp(timestamp=timestamp)
 
         item = self.file.readline()
         natoms = int(self.file.readline()) #+1
         snap['natoms'] = natoms
 
         # Invoke on_snapshot_parse_natoms callback
-        if self.callback:
-            self.callback.on_snapshot_parse_natoms(natoms)
+        self.callbacks.on_snapshot_parse_natoms(natoms=natoms)
 
         item = self.file.readline() #+1
         words = item.split("BOUNDS ")
@@ -262,8 +289,7 @@ class Dump(object):
         snap['box'] = SimulationBox(**box_dimensions)
 
         # Invoke on_snapshot_parse_box callback
-        if self.callback:
-            self.callback.on_snapshot_parse_box(snap['box'])
+        self.callbacks.on_snapshot_parse_box(box=snap['box'])
 
         atoms: List[Atom] = []
         if natoms:
@@ -280,15 +306,13 @@ class Dump(object):
 
             snap['atoms'] = atoms
             # Invoke on_snapshot_parse_atoms callback
-            if self.callback:
-                self.callback.on_snapshot_parse_atoms(atoms)
+            self.callbacks.on_snapshot_parse_atoms(atoms)
 
         # Create the snapshot
         self.snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_end callback
-        if self.callback:
-            self.callback.on_snapshot_parse_end(self.snapshot)
+        self.callbacks.on_snapshot_parse_end(snapshot=self.snapshot)
 
     def __iter__(self):
         return self
@@ -317,70 +341,11 @@ class Dump(object):
             except StopIteration as e:
                 raise StopIteration
 
-    def parse(self, persist: bool = False) -> Optional[List[DumpSnapshot]]:
+    def parse(self) -> None:
         """
         Method to parse all the snapshots and optionally persist in file/db
         """
-        if persist:
-            return [snapshot for snapshot in self]
-        else:
-            # Iterate over self while invoking the callbacks if provided
-            for _ in self:
-                pass
-            return None
-
-    def to_sql(self, simulation_id: int, sql_connection_str: str = 'sqlite://') -> None:
-        """
-        Dump the snapshots to the database referenced by the connection string
-        database defaults to an in memory sqlite database
-        """
-        engine = create_engine(sql_connection_str, echo=False)
-        session = Session(bind=engine)
-        Base.metadata.create_all(bind=engine)
-
-        sim = SimulationModel(id = simulation_id)
-        try:
-            session.add(sim)
-            session.commit()
-        except Exception:
-            session.rollback()
-
-        for snapshot in self:
-            start = time.time()
-
-            # Add the simulation timestep
-            timestep = TimestepModel(timestep = snapshot.timestamp, simulation = sim)
-            try:
-                session.add(timestep)
-                session.commit()
-            except Exception:
-                session.rollback()
-
-            # Insert simulation box info into DB
-            sbox = SimulationBoxModel(simulation = sim, timestep = timestep)
-            for field in snapshot.box.__fields_set__:
-                sbox.__dict__[field] = snapshot.box.__dict__[field]
-            
-            try:
-                session.add(sbox)
-                session.commit()
-            except Exception:
-                session.rollback()
-
-            # Insert atoms
-            atom_models: List[AtomModel] = []
-            for atom in snapshot.atoms:
-                atom_model = AtomModel(simulation = sim, timestep = timestep)
-                for field in atom.__fields_set__:
-                    atom_model.__dict__[field] = atom.__dict__[field]
-                atom_models.append(atom_model)
-            
-            try:
-                session.bulk_save_objects(atom_models, return_defaults=True)
-                session.commit()
-            except Exception as e:
-                logger.exception(e)
-
-            end = time.time()
-            if self.verbose:
-                logger.info(f"Snapshot {snapshot.timestamp} inserted in {end-start} seconds")
+        # Iterate over self while invoking the callbacks if provided
+        for _ in self:
+            pass
+        return None
