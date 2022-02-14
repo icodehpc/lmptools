@@ -1,10 +1,7 @@
 import pytest
 import os
-import itertools
 import random
 from typing import List
-
-from sqlalchemy.sql.sqltypes import Time
 from lmptools.exceptions import SkipSnapshot
 from lmptools.atom import Atom
 from pydantic.tools import parse_obj_as
@@ -69,7 +66,7 @@ class OnSnapshotParseEnd(DumpCallback):
     def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
         self.snapshots.append(snapshot)
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def dump_file():
     # Create a dump file
     filename = "dump.test.lammpstrj"
@@ -122,7 +119,7 @@ def dump_file():
             snapshots.append(DumpSnapshot(timestamp=timestep, natoms=num_atoms, box=box, atoms=atoms, unwrapped=False))
     f.close()
     yield {'filename': filename, 'snapshots': snapshots}
-    os.remove("dump.test.lammpstrj")
+    os.remove(filename)
 
 def test_dump_snapshot_parse_iteration(dump_file):
     d = Dump(dump_file['filename'], unwrap=True)

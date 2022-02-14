@@ -22,7 +22,7 @@ def sql_session():
     engine.dispose()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def dump_file():
     # Create a dump file
     filename = "dump.test.lammpstrj"
@@ -75,7 +75,7 @@ def dump_file():
             snapshots.append(DumpSnapshot(timestamp=timestep, natoms=num_atoms, box=box, atoms=atoms, unwrapped=False))
     f.close()
     yield {'filename': filename, 'snapshots': snapshots}
-    os.remove("dump.test.lammpstrj")
+    os.remove(filename)
 
 def test_create_simulation(sql_session):
     sim1 = SimulationModel(id = 1)
