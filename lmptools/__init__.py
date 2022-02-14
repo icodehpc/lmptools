@@ -1,4 +1,4 @@
 from .dump import Dump, DumpCallback, DumpSnapshot, SimulationBox
 from .atom import Atom
 from .polymers import Polymer
-from .persistance import SqliteWriter
+from .persistance import Sqlite
