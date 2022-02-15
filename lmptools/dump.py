@@ -348,28 +348,6 @@ class Dump(object):
                     elif line == '':
                         # EOF is reached
                         break
-        #while True:
-        #    try:
-        #        self.parse_snapshot()
-        #        if self.snapshot:
-        #            return self.snapshot
-        #        elif self.snapshot is None:
-        #            raise StopIteration
-        #    except SkipSnapshot as e:
-        #        if self.verbose:
-        #            logger.info(f"{e}")
-        #        # Skip the remaining lines until next line starting with ITEM: TIMESTEP\n is read
-        #        while True:
-        #            line = self.file.readline()
-        #            if line == 'ITEM: TIMESTEP\n':
-        #                cur_pos = self.file.tell()
-        #                self.file.seek(cur_pos - len('ITEM: TIMESTEP\n'))
-        #                break
-        #            elif line == '':
-        #                # EOF is reached
-        #                break
-        #    except StopIteration as e:
-        #        raise StopIteration
 
     def parse(self) -> None:
         """
