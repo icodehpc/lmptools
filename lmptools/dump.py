@@ -104,17 +104,6 @@ class DumpSnapshot(BaseModel):
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame.from_dict([atom.dict(exclude_unset=True) for atom in self.atoms])
 
-    def filter(self, filter: Callable) -> DumpSnapshot:
-        """
-        Method to apply a filter on a snapshot
-        """
-        filter(self)
-        return self
-    
-    def apply(self, func: Callable) -> DumpSnapshot:
-        func(self)
-        return self
-
 class DumpCallback(object):
     """
     Base class used to build new callbacks that will be called as the dump file is parsed
@@ -229,7 +218,7 @@ class Dump(object):
         if len(item) == 0:
             self.snapshot = None
             return
-        
+
         # Invoke on_snapshot_parse_begin callback
         self.callbacks.on_snapshot_parse_begin()
 
@@ -357,4 +346,3 @@ class Dump(object):
         for _ in self:
             pass
         return None
-    

@@ -109,7 +109,6 @@ class AtomModel(Base):
     iy = Column(Integer, nullable=True)
     iz = Column(Integer, nullable=True)
 
-
 class SnapshotWriter(ABC, DumpCallback):
     @abstractmethod
     def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
