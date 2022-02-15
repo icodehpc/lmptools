@@ -3,7 +3,7 @@ import pandas as pd
 from .exceptions import SkipSnapshot
 from pydantic import BaseModel, validator, parse_obj_as
 from .atom import Atom
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 from loguru import logger
 
 class SimulationBox(BaseModel):
@@ -104,6 +104,17 @@ class DumpSnapshot(BaseModel):
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame.from_dict([atom.dict(exclude_unset=True) for atom in self.atoms])
 
+    def filter(self, filter: Callable) -> DumpSnapshot:
+        """
+        Method to apply a filter on a snapshot
+        """
+        filter(self)
+        return self
+    
+    def apply(self, func: Callable) -> DumpSnapshot:
+        func(self)
+        return self
+
 class DumpCallback(object):
     """
     Base class used to build new callbacks that will be called as the dump file is parsed
@@ -149,7 +160,6 @@ class DumpCallback(object):
         Method called when a snapshot has been completely parsed
         """
         pass
-
 
 class CallbackList(DumpCallback):
     """
@@ -214,6 +224,7 @@ class Dump(object):
         """
         snap: dict = {}
         item = self.file.readline() # +1
+
         # Readline with return an empty string if end of file is reached
         if len(item) == 0:
             self.snapshot = None
@@ -318,16 +329,15 @@ class Dump(object):
         return self
 
     def __next__(self) -> Optional[DumpSnapshot]:
-        while True:
-            try:
-                self.parse_snapshot()
-                if self.snapshot:
-                    return self.snapshot
-                elif self.snapshot is None:
-                    raise StopIteration
-            except SkipSnapshot as e:
-                if self.verbose:
-                    logger.info(f"{e}")
+        try:
+            self.parse_snapshot()
+            if self.snapshot:
+                return self.snapshot
+            else:
+                raise StopIteration
+        except SkipSnapshot as e:
+            if self.verbose:
+                logger.info(f"{e}")
                 # Skip the remaining lines until next line starting with ITEM: TIMESTEP\n is read
                 while True:
                     line = self.file.readline()
@@ -338,8 +348,28 @@ class Dump(object):
                     elif line == '':
                         # EOF is reached
                         break
-            except StopIteration as e:
-                raise StopIteration
+        #while True:
+        #    try:
+        #        self.parse_snapshot()
+        #        if self.snapshot:
+        #            return self.snapshot
+        #        elif self.snapshot is None:
+        #            raise StopIteration
+        #    except SkipSnapshot as e:
+        #        if self.verbose:
+        #            logger.info(f"{e}")
+        #        # Skip the remaining lines until next line starting with ITEM: TIMESTEP\n is read
+        #        while True:
+        #            line = self.file.readline()
+        #            if line == 'ITEM: TIMESTEP\n':
+        #                cur_pos = self.file.tell()
+        #                self.file.seek(cur_pos - len('ITEM: TIMESTEP\n'))
+        #                break
+        #            elif line == '':
+        #                # EOF is reached
+        #                break
+        #    except StopIteration as e:
+        #        raise StopIteration
 
     def parse(self) -> None:
         """
@@ -349,3 +379,4 @@ class Dump(object):
         for _ in self:
             pass
         return None
+    
