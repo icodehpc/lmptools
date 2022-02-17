@@ -16,11 +16,9 @@ setuptools = "^57.4.0"
 SQLAlchemy = "1.4.22"
 
 [tool.poetry.dev-dependencies]
-jupyterlab = "^3.1.8"
 Faker = "^8.12.1"
 pytest-faker = "^2.0.0"
 pytest = "^6.2.4"
-matplotlib = "^3.4.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
