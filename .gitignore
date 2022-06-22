@@ -10,3 +10,4 @@ dist
 *.png
 debug.py
 *.db
+*.swp
