@@ -58,7 +58,7 @@ jobs:
 
       - name: Run tests and measure coverage
         run: |
-          PYTHONPATH=${PWD}/ pytest -vv --cov-report xml:coverage.xml --cov-report term-missing tests
+          PYTHONPATH=${PWD}/ pytest -vv --cov-report xml:coverage.xml --cov-report term-missing --cov '.' tests
 
       - name: Upload report to Codecov
         uses: codecov/codecov-action@v2
