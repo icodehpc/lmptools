@@ -5,6 +5,3 @@ loguru>=0.5.3
 scipy>=1.7.1
 setuptools>=57.4.0
 SQLAlchemy==1.4.22
-Faker>=8.12.1
-pytest-faker>=2.0.0
-pytest>=6.2.4
