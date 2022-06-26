@@ -10,13 +10,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-20.04", "macos-latest" ] 
+        os: ["ubuntu-20.04"] 
         container:
           - python:3.8-buster
           - python:3.8-bullseye
           - python:3.9-buster
           - python:3.9-bullseye
         experimental: [false]
+        include:
+          - os: macos-latest
+            python-version: "3.8"
+            experimental: false
     container: ${{ matrix.container }}
     continue-on-error: ${{ matrix.experimental }}
     outputs:
@@ -36,6 +40,7 @@ jobs:
       - name: Install package dependencies
         run: |
           pip install --no-cache-dir -r ./requirements.txt
+          pip install --no-cache-dir -r ./tests/requirements.txt
       
       - name: Build package distribution
         run: python setup.py sdist
