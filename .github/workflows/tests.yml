@@ -1,0 +1,87 @@
+name: tests
+
+on:
+  pull_request:
+
+
+jobs:
+  tests:
+    runs_on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04", "macos-latest" ] 
+        container:
+          - python:3.8-buster
+          - python:3.8-bullseye
+          - python:3.9-buster
+          - python:3.9-bullseye
+        experimental: false
+    container: ${{ matrix.container }}
+    continue-on-error: ${{ matrix.experimental }}
+    outputs:
+      release: ${{ steps.push.outputs.release }}
+    steps:
+      - name: Check out head
+        uses: action/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        if: matrix.os == 'macos-latest'
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package dependencies
+        run: |
+          pip install --no-cache-dir -r ./requirements.txt
+      
+      - name: Build package distribution
+        run: python setup.py sdist
+
+      - name: Validate distribution
+        run: |
+          VERSION="$(cat ./VERSION)"
+          cd dist
+          tar xzf lmptools-${VERSION}.tar.gz
+          diff -r lmptools-${VERSION}/lmptools ../lmptools
+          rm -rf lmptools-${VERSION}/
+
+      - name: Install lmptools
+        run: pip install -e .
+
+      - name: Run tests and measure coverage
+        run: |
+          PYTHONPATH=${PWD}/ pytest -vv --cov-report xml:coverage.xml --cov-report term-missing tests
+
+      - name: Upload report to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.xml
+
+      - name: Get latest release
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        if: github.ref == 'refs/head/develop' && matrix.os == 'ubuntu-latest'
+        with:
+          semver-only: true
+
+      - name: Push to master
+        id: push
+        if: github.ref == 'refs/heads/develop' && matrix.os == 'ubuntu-latest'
+        run: |
+          MASTER_VERSION="$(echo ${{ steps.get-latest-tag.outputs.tag }} | cut -c2- )"
+          VERSION=$(cat ./VERSION)"
+          release=false
+          if [ "$MASTER_VERSION" == "$VERSION" ]; then
+            echo "$VERSION has been previously released"
+          else
+            git config user.name "Venkat Bala"
+            git config user.email "15014089+venkatBala@users.noreply.github.com"
+            git remote set-url origin https://${{ secrets.DEVOPS_TOKEN }}@github.com/venkatBala/lmptools.git
+            git push origin HEAD:master
+            release=true
+          fi
+          echo "RELEASE=$release" >> $GITHUB_ENV
+          echo "::set-output name=release::$release" 
