@@ -16,7 +16,7 @@ jobs:
           - python:3.8-bullseye
           - python:3.9-buster
           - python:3.9-bullseye
-        experimental: false
+        experimental: [false]
     container: ${{ matrix.container }}
     continue-on-error: ${{ matrix.experimental }}
     outputs:
