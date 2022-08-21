@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-20.04"] 
+        os: ["ubuntu-20.04"]
         container:
           - python:3.8-buster
           - python:3.8-bullseye
@@ -41,7 +41,7 @@ jobs:
         run: |
           pip install --no-cache-dir -r ./requirements.txt
           pip install --no-cache-dir -r ./tests/requirements.txt
-      
+
       - name: Build package distribution
         run: python setup.py sdist
 
@@ -89,4 +89,4 @@ jobs:
             release=true
           fi
           echo "RELEASE=$release" >> $GITHUB_ENV
-          echo "::set-output name=release::$release" 
+          echo "::set-output name=release::$release"

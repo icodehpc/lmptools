@@ -2,6 +2,7 @@ class SkipSnapshot(Exception):
     """
     Exception to be raised when a snapshot is skipped while parsing a dump file
     """
+
     def __init__(self, msg: str):
         super(SkipSnapshot, self).__init__()
         self.msg = msg

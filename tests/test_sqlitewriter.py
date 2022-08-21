@@ -1,18 +1,27 @@
 import os
-from subprocess import call
-import pytest
 import random
+from subprocess import call
 from typing import List
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy import create_engine
-from lmptools import Atom
+
+import pytest
 from pydantic import parse_obj_as
-from lmptools.persistance import Base, SimulationModel, SqliteWriter, TimestepModel, SimulationBoxModel, AtomModel
-from lmptools import Dump, DumpSnapshot, SimulationBox, DumpCallback
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from lmptools import Atom, Dump, DumpCallback, DumpSnapshot, SimulationBox
+from lmptools.persistance import (
+    AtomModel,
+    Base,
+    SimulationBoxModel,
+    SimulationModel,
+    SqliteWriter,
+    TimestepModel,
+)
+
 
 @pytest.fixture
 def sql_session():
-    engine = create_engine('sqlite://', echo=True)
+    engine = create_engine("sqlite://", echo=True)
     Base.metadata.create_all(bind=engine)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -22,7 +31,7 @@ def sql_session():
     engine.dispose()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def dump_file():
     # Create a dump file
     filename = "dump.test.lammpstrj"
@@ -41,8 +50,17 @@ def dump_file():
             zlo = -box_length
             zhi = box_length
 
-            box = SimulationBox(xlo=xlo, xhi=xhi, ylo=ylo, yhi=yhi,
-                                zlo=zlo, zhi=zhi, xprd='pp', yprd='pp', zprd='pp')
+            box = SimulationBox(
+                xlo=xlo,
+                xhi=xhi,
+                ylo=ylo,
+                yhi=yhi,
+                zlo=zlo,
+                zhi=zhi,
+                xprd="pp",
+                yprd="pp",
+                zprd="pp",
+            )
 
             dump_colnames: str = ""
             if random.random() <= 0.25:
@@ -65,21 +83,36 @@ def dump_file():
             atoms: List[Atom] = []
             for _ in range(num_atoms):
                 entry = {}
-                random_numbers = [random.random()+random.randint(100, 1000) for _ in range(len(dump_colnames))]
+                random_numbers = [
+                    random.random() + random.randint(100, 1000)
+                    for _ in range(len(dump_colnames))
+                ]
                 for key, value in zip(dump_colnames.split(), random_numbers):
                     entry[key] = value
                 atom = parse_obj_as(Atom, entry)
                 atoms.append(atom)
-                f.write(" ".join([str(atom.__dict__[key]) for key in dump_colnames.split()])+"\n")
+                f.write(
+                    " ".join([str(atom.__dict__[key]) for key in dump_colnames.split()])
+                    + "\n"
+                )
 
-            snapshots.append(DumpSnapshot(timestamp=timestep, natoms=num_atoms, box=box, atoms=atoms, unwrapped=False))
+            snapshots.append(
+                DumpSnapshot(
+                    timestamp=timestep,
+                    natoms=num_atoms,
+                    box=box,
+                    atoms=atoms,
+                    unwrapped=False,
+                )
+            )
     f.close()
-    yield {'filename': filename, 'snapshots': snapshots}
+    yield {"filename": filename, "snapshots": snapshots}
     os.remove(filename)
 
+
 def test_create_simulation(sql_session):
-    sim1 = SimulationModel(id = 1)
-    sim2 = SimulationModel(id = 2)
+    sim1 = SimulationModel(id=1)
+    sim2 = SimulationModel(id=2)
     sql_session.add(sim1)
     sql_session.add(sim2)
     sql_session.commit()
@@ -88,37 +121,55 @@ def test_create_simulation(sql_session):
     num_simulations = sql_session.query(SimulationModel).count()
     assert num_simulations == 2
 
+
 def test_create_simulation_and_timestep(sql_session):
     sql_session.rollback()
-    sim = SimulationModel(id = 1)
+    sim = SimulationModel(id=1)
     sql_session.add(sim)
-    timestep = TimestepModel(timestep = 1000, simulation = sim)
+    timestep = TimestepModel(timestep=1000, simulation=sim)
     sql_session.add(timestep)
 
     tstep = sql_session.query(TimestepModel).first()
     assert tstep.timestep == 1000
 
+
 def test_create_simulation_timestep_and_box(sql_session):
-    sim = SimulationModel(id = 1)
+    sim = SimulationModel(id=1)
     sql_session.add(sim)
-    timestep = TimestepModel(timestep = 1000, simulation = sim)
+    timestep = TimestepModel(timestep=1000, simulation=sim)
     sql_session.add(timestep)
-    box = SimulationBoxModel(xlo=-10, xhi=10, ylo=-10, yhi=10, simulation=sim, timestep=timestep)
+    box = SimulationBoxModel(
+        xlo=-10, xhi=10, ylo=-10, yhi=10, simulation=sim, timestep=timestep
+    )
     sql_session.add(box)
 
-    box_res = sql_session.query(SimulationBoxModel).filter(TimestepModel.timestep == 1000).one()
-    assert box_res.xlo == -10 and box_res.xhi == 10 \
-            and box_res.ylo == -10 and box_res.yhi == 10 \
-                and box_res.zlo == None and box_res.zhi == None
+    box_res = (
+        sql_session.query(SimulationBoxModel)
+        .filter(TimestepModel.timestep == 1000)
+        .one()
+    )
+    assert (
+        box_res.xlo == -10
+        and box_res.xhi == 10
+        and box_res.ylo == -10
+        and box_res.yhi == 10
+        and box_res.zlo == None
+        and box_res.zhi == None
+    )
+
 
 def test_create_simulation_timestep_box_molecule_and_atom(sql_session):
-    sim = SimulationModel(id = 1)
+    sim = SimulationModel(id=1)
     sql_session.add(sim)
-    timestep = TimestepModel(timestep = 1000, simulation = sim)
+    timestep = TimestepModel(timestep=1000, simulation=sim)
     sql_session.add(timestep)
-    box = SimulationBoxModel(xlo=-10, xhi=10, ylo=-10, yhi=10, simulation=sim, timestep=timestep)
+    box = SimulationBoxModel(
+        xlo=-10, xhi=10, ylo=-10, yhi=10, simulation=sim, timestep=timestep
+    )
     sql_session.add(box)
-    atom = AtomModel(id = 1, type = 1, x = 0.1, y = 0.2, z = 0.3, timestep = timestep, simulation = sim)
+    atom = AtomModel(
+        id=1, type=1, x=0.1, y=0.2, z=0.3, timestep=timestep, simulation=sim
+    )
     sql_session.add(atom)
 
     res = sql_session.query(AtomModel).one()
@@ -127,30 +178,39 @@ def test_create_simulation_timestep_box_molecule_and_atom(sql_session):
 
 # Test snapshot persistence
 def test_dump_snapshot_sqlitedb_creation(dump_file):
-    d = Dump(dump_file_name=dump_file['filename'], callbacks=SqliteWriter(simulation_id = 1, db_name = "test.db"))
-    assert os.path.exists('test.db') == True
-    os.remove('test.db')
+    d = Dump(
+        dump_file_name=dump_file["filename"],
+        callbacks=SqliteWriter(simulation_id=1, db_name="test.db"),
+    )
+    assert os.path.exists("test.db") == True
+    os.remove("test.db")
+
 
 def test_dump_snapshot_persist_simulation_model(dump_file):
-    cb = SqliteWriter(simulation_id = 1, db_name = "test.db")
-    d = Dump(dump_file_name=dump_file['filename'], callbacks = cb)
-    d.parse()
-
-    # Assert
-    engine = create_engine('sqlite:///test.db', echo=False)
-    session = Session(bind=engine)
-    assert session.query(SimulationModel.id).first()[0] == 1
-    os.remove('test.db')
-
-def test_dump_snapshot_persist_simulation_timestep(dump_file):
-    cb = SqliteWriter(simulation_id = 1, db_name = "test.db", debug=False)
-    d = Dump(dump_file_name=dump_file['filename'], callbacks = cb)
+    cb = SqliteWriter(simulation_id=1, db_name="test.db")
+    d = Dump(dump_file_name=dump_file["filename"], callbacks=cb)
     d.parse()
 
     # Assert
     engine = create_engine("sqlite:///test.db", echo=False)
     session = Session(bind=engine)
-    for snapshot in dump_file['snapshots']:
-        res = session.query(TimestepModel.timestep).filter(TimestepModel.timestep == snapshot.timestamp).scalar()
+    assert session.query(SimulationModel.id).first()[0] == 1
+    os.remove("test.db")
+
+
+def test_dump_snapshot_persist_simulation_timestep(dump_file):
+    cb = SqliteWriter(simulation_id=1, db_name="test.db", debug=False)
+    d = Dump(dump_file_name=dump_file["filename"], callbacks=cb)
+    d.parse()
+
+    # Assert
+    engine = create_engine("sqlite:///test.db", echo=False)
+    session = Session(bind=engine)
+    for snapshot in dump_file["snapshots"]:
+        res = (
+            session.query(TimestepModel.timestep)
+            .filter(TimestepModel.timestep == snapshot.timestamp)
+            .scalar()
+        )
         assert res == snapshot.timestamp
-    os.remove('test.db')
+    os.remove("test.db")
