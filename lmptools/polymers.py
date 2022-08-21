@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
-import numpy as np
 from typing import List
+
+import numpy as np
+from pydantic import BaseModel
+
 from .atom import Atom
+
 
 class Polymer(BaseModel):
     atoms: List[Atom]
@@ -43,19 +46,19 @@ class Polymer(BaseModel):
         z = np.asarray([atom.zu for atom in self.atoms])
 
         # (1/M)sum(m_i * (r_i,x - rcm,x)**2)
-        rxx = np.dot(masses, (x - rcm[0])**2)/self.mass
-        ryy = np.dot(masses, (y - rcm[1])**2)/self.mass
-        rzz = np.dot(masses, (z - rcm[2])**2)/self.mass
-        rxy = np.dot(masses, (x - rcm[0])*(y - rcm[1]))/self.mass
-        rxz = np.dot(masses, (x - rcm[0])*(z - rcm[2]))/self.mass
-        ryz = np.dot(masses, (y - rcm[1])*(z - rcm[2]))/self.mass
+        rxx = np.dot(masses, (x - rcm[0]) ** 2) / self.mass
+        ryy = np.dot(masses, (y - rcm[1]) ** 2) / self.mass
+        rzz = np.dot(masses, (z - rcm[2]) ** 2) / self.mass
+        rxy = np.dot(masses, (x - rcm[0]) * (y - rcm[1])) / self.mass
+        rxz = np.dot(masses, (x - rcm[0]) * (z - rcm[2])) / self.mass
+        ryz = np.dot(masses, (y - rcm[1]) * (z - rcm[2])) / self.mass
 
         # gyration tensor
         tensor = np.array([[rxx, rxy, rxz], [rxy, ryy, ryz], [rxz, ryz, rzz]])
 
         eigenvalues, _ = np.linalg.eig(tensor)
-        #index = eigenvalues.argsort()[::-1]
-        
+        # index = eigenvalues.argsort()[::-1]
+
         # return the principal eigenvalue
         return np.sqrt(np.sum(eigenvalues))
 

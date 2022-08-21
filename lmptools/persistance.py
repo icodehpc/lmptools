@@ -1,12 +1,19 @@
-from loguru import logger
 from abc import ABC, abstractmethod
 from typing import List
-from lmptools import DumpSnapshot
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, ForeignKey, Float, String, Boolean
-from sqlalchemy.orm import declarative_base, relationship
 
+from loguru import logger
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    create_engine,
+)
+from sqlalchemy.orm import Session, declarative_base, relationship
+
+from lmptools import DumpSnapshot
 from lmptools.dump import DumpCallback
 
 Base = declarative_base()
@@ -16,12 +23,14 @@ class SimulationModel(Base):
     """
     Top level table to encapsulate the entire simulation
     """
+
     __tablename__ = "simulation"
     id = Column(Integer, primary_key=True, autoincrement=False, index=True)
-    timesteps = relationship('TimestepModel', backref='simulation')
-    simboxes = relationship('SimulationBoxModel', backref='simulation')
-    #molecules = relationship('MoleculeModel', backref='simulation')
-    atoms = relationship('AtomModel', backref='simulation')
+    timesteps = relationship("TimestepModel", backref="simulation")
+    simboxes = relationship("SimulationBoxModel", backref="simulation")
+    # molecules = relationship('MoleculeModel', backref='simulation')
+    atoms = relationship("AtomModel", backref="simulation")
+
 
 class TimestepModel(Base):
     """
@@ -30,22 +39,25 @@ class TimestepModel(Base):
 
     one-to-one relationship between a timestep and a simulation box
     """
+
     __tablename__ = "timesteps"
     timestep = Column(Integer, primary_key=True, autoincrement=False, index=True)
-    simulation_id = Column(Integer, ForeignKey('simulation.id'), index=True)
-    sim_box = relationship('SimulationBoxModel', backref='timestep', uselist=False)
-    #molecules = relationship('MoleculeModel', backref='timestep')
-    atoms = relationship('AtomModel', backref='timestep')
+    simulation_id = Column(Integer, ForeignKey("simulation.id"), index=True)
+    sim_box = relationship("SimulationBoxModel", backref="timestep", uselist=False)
+    # molecules = relationship('MoleculeModel', backref='timestep')
+    atoms = relationship("AtomModel", backref="timestep")
+
 
 class SimulationBoxModel(Base):
     """
     SQLAlchemy model for writing simulation box dimensions
     """
-    __tablename__ = 'simulation_box'
-    id = Column(Integer, primary_key = True, autoincrement=True, index=True)
-    xprd = Column(String, default='pp')
-    yprd = Column(String, default='pp')
-    zprd = Column(String, default='pp')
+
+    __tablename__ = "simulation_box"
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    xprd = Column(String, default="pp")
+    yprd = Column(String, default="pp")
+    zprd = Column(String, default="pp")
     xlo = Column(Float, nullable=True)
     xhi = Column(Float, nullable=True)
     ylo = Column(Float, nullable=True)
@@ -57,19 +69,21 @@ class SimulationBoxModel(Base):
     yz = Column(Float, nullable=True)
     triclinic = Column(Boolean, nullable=True, default=False)
 
-    simulation_id = Column(Integer, ForeignKey('simulation.id'), index=True)
-    timestep_id = Column(Integer, ForeignKey('timesteps.timestep'), index=True)
+    simulation_id = Column(Integer, ForeignKey("simulation.id"), index=True)
+    timestep_id = Column(Integer, ForeignKey("timesteps.timestep"), index=True)
+
 
 class AtomModel(Base):
     """
     SQLaclchemy model for a simulation atom(s)
     """
-    __tablename__ = 'atoms'
+
+    __tablename__ = "atoms"
     sql_id = Column(Integer, primary_key=True, autoincrement=True)
     id = Column(Integer, index=True)
-    mol = Column(Integer,index=True)
-    timestep_id = Column(Integer, ForeignKey('timesteps.timestep'), index=True)
-    simulation_id = Column(Integer, ForeignKey('simulation.id'), index=True)
+    mol = Column(Integer, index=True)
+    timestep_id = Column(Integer, ForeignKey("timesteps.timestep"), index=True)
+    simulation_id = Column(Integer, ForeignKey("simulation.id"), index=True)
     type = Column(Integer, default=1, index=True)
     mass = Column(Float, default=1.0)
     x = Column(Float, nullable=True)
@@ -109,10 +123,12 @@ class AtomModel(Base):
     iy = Column(Integer, nullable=True)
     iz = Column(Integer, nullable=True)
 
+
 class SnapshotWriter(ABC, DumpCallback):
     @abstractmethod
     def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
         pass
+
 
 class SqliteWriter(SnapshotWriter):
     """
@@ -120,20 +136,23 @@ class SqliteWriter(SnapshotWriter):
 
     Overrides the on_snapshot_parse_end method to insert the snapshot into database
     """
-    def __init__(self, simulation_id: int, db_name: str = "snapshots.db", debug: bool = False):
+
+    def __init__(
+        self, simulation_id: int, db_name: str = "snapshots.db", debug: bool = False
+    ):
         self.__db_name = db_name
         if debug:
             self.__engine = create_engine(f"sqlite:///{self.__db_name}", echo=True)
         else:
-            self.__engine = create_engine(f"sqlite:///{self.__db_name}", echo = False)
-    
+            self.__engine = create_engine(f"sqlite:///{self.__db_name}", echo=False)
+
         self.__session = Session(bind=self.__engine)
         Base.metadata.create_all(bind=self.__engine)
         self.__simulation_id = simulation_id
         self.__debug = debug
 
         # Persist the simulation
-        self.__sim = SimulationModel(id = self.__simulation_id)
+        self.__sim = SimulationModel(id=self.__simulation_id)
         try:
             self.__session.add(self.__sim)
             self.__session.commit()
@@ -144,7 +163,7 @@ class SqliteWriter(SnapshotWriter):
 
     def on_snapshot_parse_end(self, snapshot: DumpSnapshot, *args, **kwargs):
         # Add snapshot timestep into db
-        timestep = TimestepModel(timestep = snapshot.timestamp, simulation = self.__sim)
+        timestep = TimestepModel(timestep=snapshot.timestamp, simulation=self.__sim)
         try:
             self.__session.add(timestep)
             self.__session.commit()
@@ -154,7 +173,7 @@ class SqliteWriter(SnapshotWriter):
                 logger.debug(e)
 
         # Add simulation box info to db
-        sbox = SimulationBoxModel(simulation = self.__sim, timestep = timestep)
+        sbox = SimulationBoxModel(simulation=self.__sim, timestep=timestep)
         for field in snapshot.box.__fields_set__:
             sbox.__dict__[field] = snapshot.box.__dict__[field]
 
@@ -167,7 +186,7 @@ class SqliteWriter(SnapshotWriter):
         # Insert atoms
         atom_models: List[AtomModel] = []
         for atom in snapshot.atoms:
-            atom_model = AtomModel(simulation = self.__sim, timestep = timestep)
+            atom_model = AtomModel(simulation=self.__sim, timestep=timestep)
             for field in atom.__fields_set__:
                 atom_model.__dict__[field] = atom.__dict__[field]
             atom_models.append(atom_model)
@@ -179,4 +198,6 @@ class SqliteWriter(SnapshotWriter):
             self.__session.rollback()
 
         if self.__debug:
-            logger.debug(f"Snapshot {snapshot.timestamp} inserted into {self.__db_name}")
+            logger.debug(
+                f"Snapshot {snapshot.timestamp} inserted into {self.__db_name}"
+            )
