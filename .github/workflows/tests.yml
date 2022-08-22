@@ -3,7 +3,6 @@ name: tests
 on:
   pull_request:
 
-
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
@@ -50,7 +49,9 @@ jobs:
           VERSION="$(cat ./VERSION)"
           cd dist
           tar xzf lmptools-${VERSION}.tar.gz
-          diff -r lmptools-${VERSION}/lmptools ../lmptools
+          diff -r lmptools-${VERSION}/lmptools/core ../lmptools/core
+          diff -r lmptools-${VERSION}/lmptools/dump ../lmptools/dump
+          diff -r lmptools-${VERSION}/lmptools/writers ../lmptools/writers
           rm -rf lmptools-${VERSION}/
 
       - name: Install lmptools
