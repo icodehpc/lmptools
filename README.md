@@ -16,3 +16,8 @@ To install the latest release
 ```bash
 pip install lmptools
 ```
+
+
+## Contributing Guidelines
+
+To contribute to `lmptools` review [Contributing](CONTRIBUTING.md).
