@@ -23,7 +23,7 @@ class Polymer(BaseModel):
         # Assert that unwrapped coordinates are provided
         unwrapped = all([atom.unwrapped for atom in self.atoms])
         if not unwrapped:
-            raise AssertionError(f"Polymer not unwrapped")
+            raise AssertionError("Polymer not unwrapped")
 
         xcm = np.mean([atom.xu for atom in self.atoms])
         ycm = np.mean([atom.yu for atom in self.atoms])
@@ -37,7 +37,7 @@ class Polymer(BaseModel):
         """
         unwrapped = all([atom.unwrapped for atom in self.atoms])
         if not unwrapped:
-            raise AssertionError(f"Polymer not unwrapped")
+            raise AssertionError("Polymer not unwrapped")
 
         rcm = self.com
         masses = np.asarray([atom.mass for atom in self.atoms])

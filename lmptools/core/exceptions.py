@@ -11,4 +11,4 @@ class SkipSnapshot(Exception):
         if self.msg:
             return f"SkipSnapshot, {self.msg}"
         else:
-            return f"Exception SkipSnapshot occurred"
+            return "Exception SkipSnapshot occurred"

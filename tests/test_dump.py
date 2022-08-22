@@ -5,9 +5,8 @@ from typing import List
 import pytest
 from pydantic.tools import parse_obj_as
 
-from lmptools import Dump, DumpCallback, DumpSnapshot, SimulationBox
-from lmptools.atom import Atom
-from lmptools.exceptions import SkipSnapshot
+from lmptools.core import Atom, DumpSnapshot, SimulationBox, SkipSnapshot
+from lmptools.dump import Dump, DumpCallback
 
 
 class SkipSnapshotCallback(DumpCallback):
@@ -24,8 +23,8 @@ class OnSnapshotParseBegin(DumpCallback):
     """
     Callback to use to count the number of snapshots in a dumpfile
 
-    Use the on_snapshot_parse_begin callback to increment the `num_snapshots` attribute by 1
-    each time to count the snapshots
+    Use the on_snapshot_parse_begin callback to increment
+    the `num_snapshots` attribute by 1 each time to count the snapshots
     """
 
     def __init__(self):
@@ -131,18 +130,12 @@ def dump_file():
             atoms: List[Atom] = []
             for _ in range(num_atoms):
                 entry = {}
-                random_numbers = [
-                    random.random() + random.randint(100, 1000)
-                    for _ in range(len(dump_colnames))
-                ]
+                random_numbers = [random.random() + random.randint(100, 1000) for _ in range(len(dump_colnames))]
                 for key, value in zip(dump_colnames.split(), random_numbers):
                     entry[key] = value
                 atom = parse_obj_as(Atom, entry)
                 atoms.append(atom)
-                f.write(
-                    " ".join([str(atom.__dict__[key]) for key in dump_colnames.split()])
-                    + "\n"
-                )
+                f.write(" ".join([str(atom.__dict__[key]) for key in dump_colnames.split()]) + "\n")
 
             snapshots.append(
                 DumpSnapshot(
