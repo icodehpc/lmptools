@@ -7,9 +7,9 @@ from pydantic import parse_obj_as
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from lmptools.core import Atom
+from lmptools.core.atom import Atom
 from lmptools.core.simulation import DumpSnapshot, SimulationBox
-from lmptools.dump import Dump
+from lmptools.dump.base import Dump
 from lmptools.writers.sql import (
     AtomModel,
     Base,

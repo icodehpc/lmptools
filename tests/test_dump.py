@@ -5,8 +5,10 @@ from typing import List
 import pytest
 from pydantic.tools import parse_obj_as
 
-from lmptools.core import Atom, DumpSnapshot, SimulationBox, SkipSnapshot
-from lmptools.dump import Dump, DumpCallback
+from lmptools.core.atom import Atom
+from lmptools.core.exceptions import SkipSnapshot
+from lmptools.core.simulation import DumpSnapshot, SimulationBox
+from lmptools.dump.base import Dump, DumpCallback
 
 
 class SkipSnapshotCallback(DumpCallback):
