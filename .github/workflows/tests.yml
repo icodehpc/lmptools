@@ -3,14 +3,13 @@ name: tests
 on:
   pull_request:
 
-
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-20.04"] 
+        os: ["ubuntu-20.04"]
         container:
           - python:3.8-buster
           - python:3.8-bullseye
@@ -41,7 +40,7 @@ jobs:
         run: |
           pip install --no-cache-dir -r ./requirements.txt
           pip install --no-cache-dir -r ./tests/requirements.txt
-      
+
       - name: Build package distribution
         run: python setup.py sdist
 
@@ -50,7 +49,9 @@ jobs:
           VERSION="$(cat ./VERSION)"
           cd dist
           tar xzf lmptools-${VERSION}.tar.gz
-          diff -r lmptools-${VERSION}/lmptools ../lmptools
+          diff -r lmptools-${VERSION}/lmptools/core ../lmptools/core
+          diff -r lmptools-${VERSION}/lmptools/dump ../lmptools/dump
+          diff -r lmptools-${VERSION}/lmptools/writers ../lmptools/writers
           rm -rf lmptools-${VERSION}/
 
       - name: Install lmptools
@@ -89,4 +90,4 @@ jobs:
             release=true
           fi
           echo "RELEASE=$release" >> $GITHUB_ENV
-          echo "::set-output name=release::$release" 
+          echo "::set-output name=release::$release"

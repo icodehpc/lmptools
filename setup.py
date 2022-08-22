@@ -1,8 +1,4 @@
-import os
-import site
-import sys
-
-from setuptools import Command, find_packages, setup
+from setuptools import find_packages, setup
 
 with open("VERSION", "r") as f:
     version = f.read().strip()
@@ -19,7 +15,8 @@ setup_info = {
     "license": "MIT License",
     "author": "Venkat Bala",
     "author_email": "balavk89@gmail.com",
-    "description": "lmptools is python module to facilitate post processing of LAMMPS simulation output files",
+    "description": """lmptools is python module to facilitate post
+        processing of LAMMPS simulation output files""",
     "long_description": open("README.md").read(),
     "long_description_content_type": "text/markdown",
     "include_package_data": True,
@@ -39,8 +36,6 @@ setup_info = {
         "Programming Language :: Python :: 3.9",
         "Topic :: Adaptive Technologies",
         "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
-        "Topic :: Software Development",
         "Topic :: System :: Distributed Computing",
     ],
 }
