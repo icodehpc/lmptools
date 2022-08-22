@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import List, Optional
+from typing import Optional
 
 import pandas as pd
 from pydantic import BaseModel
@@ -21,9 +21,7 @@ class Vector(BaseModel):
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def __eq__(self, vector: Vector) -> bool:
-        return all(
-            [self.__dict__[key] == vector.__dict__[key] for key in self.__fields_set__]
-        )
+        return all([self.__dict__[key] == vector.__dict__[key] for key in self.__fields_set__])
 
 
 class Atom(BaseModel):
@@ -58,13 +56,7 @@ class Atom(BaseModel):
     unwrapped: bool = False
 
     def __str__(self):
-        return " ".join(
-            [
-                f"{self.__dict__[key]}"
-                for key in sorted(list(self.__fields_set__))
-                if key != "unwrapped"
-            ]
-        )
+        return " ".join([f"{self.__dict__[key]}" for key in sorted(list(self.__fields_set__)) if key != "unwrapped"])
 
     def __eq__(self, other: Atom) -> bool:
         return all([self.__dict__[k] == other.__dict__[k] for k in self.__fields_set__])
