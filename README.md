@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/venkatbala/lmptools/actions/workflows/tests.yml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/venkatBala/lmptools/develop.svg)](https://results.pre-commit.ci/latest/github/venkatBala/lmptools/develop)
-[![codecov](https://codecov.io/gh/venkatBala/lmptools/branch/main/graph/badge.svg?token=V5HRAOTNRX)](https://codecov.io/gh/venkatBala/lmptools)
+[![codecov](https://codecov.io/gh/venkatBala/lmptools/branch/develop/graph/badge.svg?token=V5HRAOTNRX)](https://codecov.io/gh/venkatBala/lmptools)
 
 **LMPTOOLS** is a Python package that aims to facilitate post-processing of [LAMMPS](https://www.lammps.org/) simulation data/dump files. The design of this tool
 is modular in nature with the aim to be easily extensible. The design principle behind `lmptools` is that it treats the simulation outputs (dump files, log files) as a tape that
