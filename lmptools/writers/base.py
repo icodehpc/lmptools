@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from ..core.simulation import DumpSnapshot
-from ..dump import DumpCallback
+from ..dump.base import DumpCallback
 
 
 class SnapshotWriter(ABC, DumpCallback):
