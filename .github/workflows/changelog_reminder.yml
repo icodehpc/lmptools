@@ -8,10 +8,7 @@ jobs:
     name: Changelog reminder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@develop
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
+      - uses: actions/checkout@master
       - name: Changelog Reminder
         uses: peterjgrainger/action-changelog-reminder@v1.3.0
         with:
