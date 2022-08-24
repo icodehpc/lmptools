@@ -1,0 +1,81 @@
+name: changelog
+
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - "CHANGELOG.md"
+      - "VERSION"
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.5"
+
+      - name: Download changelog parser
+        uses: actions/checkout@v3
+        with:
+          repository: venkatBala/changelog
+          path: "./changelog"
+
+      - name: Compile changelog parser
+        run: |
+          go build
+          go install
+          export PATH=$PATH:$HOME/go/bin
+        working-directory: ./changelog
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Parse Unreleased header to determine version update
+        id: updateChangelog
+        run: |
+          # Current version
+          # Read current version from file
+          VERSION=$(cat ./VERSION)
+
+          MAJOR_VERSION=$(echo $VERSION | cut -d"." -f1)
+          MINOR_VERSION=$(echo $VERSION | cut -d"." -f2)
+          PATCH_VERSION=$(echo $VERSION | cut -d"." -f3)
+
+          # Parse the headers into a shell array
+          IFS=$'\n' read -r -d '' -a HEADERS < <( ~/go/bin/changelog show Unreleased | grep '^###' | cut -d" " -f2 && printf '\0' )
+          NUM_HEADERS=${#HEADERS[@]}
+
+          if [[ $NUM_HEADERS -eq 0 ]]; then
+            echo "CHANGELOG.md not updated"
+            exit 1
+          fi
+
+          echo "Headers parsed: ${HEADERS[@]}"
+
+          # Check if the parsed headers are either Added, Changed or Removed
+          if [[ "${HEADERS[@]}" =~ "Added" ]] || [[ "${HEADERS[@]}" =~ "Changed" ]] || [[ "${HEADERS[@]}" =~ "Removed" ]]
+          then
+            echo '::set-output name=message::Minor version will be incremented'
+            MINOR_VERSION=$((MINOR_VERSION+1))
+          elif [[ "${HEADERS[@]}" =~ "Fixed" ]] || [[ "${HEADERS[@]}" =~ "Security" ]]
+            echo '::set-output name=message::Patch version will be incremented'
+            PATCH_VERSION=$((PATCH_VERSION+1))
+          else
+            echo '::set-output name=message::noop'
+          fi
+
+          # Update version
+          VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
+          echo $VERSION > VERSION
+
+      - name: Commit the new version to develop
+        if: ${{ steps.updateChangelog.outputs.message != "noop" }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: LMPToolsOpsBot
+          author_email: lmptoolsopsbot@users.noreply.github.com
+          message: ${{ steps.updateChangelog.outputs.message }}
+          push: origin develop --force
