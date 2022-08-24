@@ -72,7 +72,7 @@ jobs:
           echo $VERSION > VERSION
 
       - name: Commit the new version to develop
-        if: ${{ steps.updateChangelog.outputs.message != "noop" }}
+        if: ${{ steps.updateChangelog.outputs.message != 'noop' }}
         uses: EndBug/add-and-commit@v9
         with:
           author_name: LMPToolsOpsBot
