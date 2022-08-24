@@ -1,0 +1,19 @@
+name: Changelog reminder
+
+on:
+  pull_request:
+
+jobs:
+  remind:
+    name: Changelog reminder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Changelog Reminder
+        uses: peterjgrainger/action-changelog-reminder@v1.3.0
+        with:
+          changelog_regex: "CHANGELOG.md"
+          customPrMessage: |
+            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the [Unreleased] section
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
