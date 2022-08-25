@@ -9,7 +9,6 @@ on:
       - "CHANGELOG.md"
       - "VERSION"
       - ".github/**"
-      - "tests/**"
       - ".pre-commit-config.yaml"
       - ".gitignore"
       - "*.md"
@@ -41,7 +40,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Parse Unreleased header to determine version update
-        id: updateChangelog
+        id: update_changelog
         run: |
           # Current version
           # Read current version from file
@@ -79,18 +78,10 @@ jobs:
           echo $VERSION > VERSION
 
       - name: Commit the new version to develop
-        if: ${{ steps.updateChangelog.outputs.message != 'noop' }}
+        if: ${{ steps.update_changelog.outputs.message != 'noop' }}
         uses: EndBug/add-and-commit@v9
         with:
           author_name: LMPToolsOpsBot
           author_email: lmptoolsopsbot@users.noreply.github.com
-          message: ${{ steps.updateChangelog.outputs.message }}
+          message: ${{ steps.update_changelog.outputs.message }}
           push: origin develop --force
-
-    release:
-      needs: changelog
-      if: github.ref == 'refs/heads/develop'
-      uses: venkatBala/lmptools/.github/workflows/release.yml@develop
-      secrets: inherit
-      with:
-        prerelease: true
