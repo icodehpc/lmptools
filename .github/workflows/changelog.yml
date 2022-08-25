@@ -59,21 +59,24 @@ jobs:
 
           echo "Headers parsed: ${HEADERS[@]}"
 
+          echo '::set-output name=message::noop'
+
           # Check if the parsed headers are either Added, Changed or Removed
           if [[ "${HEADERS[@]}" =~ "Added" ]] || [[ "${HEADERS[@]}" =~ "Changed" ]] || [[ "${HEADERS[@]}" =~ "Removed" ]]
           then
             echo '::set-output name=message::Minor version will be incremented'
             MINOR_VERSION=$((MINOR_VERSION+1))
-          elif [[ "${HEADERS[@]}" =~ "Fixed" ]] || [[ "${HEADERS[@]}" =~ "Security" ]]
+          fi
+
+          if [[ "${HEADERS[@]}" =~ "Fixed" ]] || [[ "${HEADERS[@]}" =~ "Security" ]]
+          then
             echo '::set-output name=message::Patch version will be incremented'
             PATCH_VERSION=$((PATCH_VERSION+1))
-          else
-            echo '::set-output name=message::noop'
           fi
 
           # Update version
           VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
-          echo $VERSION > VERSION
+          echo $VERSION > ./VERSION
 
       - name: Commit the new version to develop
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}

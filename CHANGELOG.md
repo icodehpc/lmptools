@@ -12,3 +12,8 @@
 - Update `triggers` on `changelog` workflow
 - Remove markdown ignore from ignored files
 - Updated `README` by adding reference to CONTRIBUTING.md
+
+
+### Fixed
+
+- Update changelog parsing logic
