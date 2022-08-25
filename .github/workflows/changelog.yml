@@ -81,7 +81,8 @@ jobs:
       - name: Create release changelog
         id: update_changelog
         run: |
-          ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/${{ env.GITHUB_SHA }}...develop -f ./CHANGELOG.md
+          VERSION=$(cat ./VERSION)
+          ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
       - name: Commit the new changes to develop
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}
