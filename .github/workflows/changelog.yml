@@ -82,7 +82,7 @@ jobs:
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: LMPToolsOpsBot
-          author_email: lmptoolsopsbot@users.noreply.github.com
+          author_name: Venkat Bala
+          author_email: 15014089+venkatBala@users.noreply.github.com
           message: ${{ steps.update_changelog.outputs.message }}
           push: origin develop --force
