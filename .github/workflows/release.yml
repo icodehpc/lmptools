@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout develop
-        uses: action/checkout@v3
+        uses: actions/checkout@v3
         if: inputs.prerelease
         with:
           persist-credentials: false
