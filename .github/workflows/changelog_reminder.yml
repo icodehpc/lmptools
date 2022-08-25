@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Changelog check
+        id: changelog_check
         uses: Zomzog/changelog-checker@v1.2.0
         with:
           fileName: CHANGELOG.md
@@ -18,6 +19,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Changelog Reminder
+        id: reminder
         uses: peterjgrainger/action-changelog-reminder@v1.3.0
         with:
           changelog_regex: "CHANGELOG.md"
@@ -28,5 +30,5 @@ jobs:
 
   changelog:
     needs: remind
-    uses: venkatBala/lmptools/.github/workflows/changelog.yml@"${{ env.GITHUB_HEAD_REF }}"
+    uses: .github/workflows/changelog.yml
     secrets: inherit
