@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Parse Unreleased header to determine version update
-        id: update_changelog
+        id: update_version
         run: |
           # Current version
           # Read current version from file
@@ -78,11 +78,16 @@ jobs:
           VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
           echo $VERSION > ./VERSION
 
-      - name: Commit the new version to develop
+      - name: Create release changelog
+        id: update_changelog
+        run: |
+          ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/${{ env.GITHUB_SHA }}...develop -f ./CHANGELOG.md
+
+      - name: Commit the new changes to develop
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: LMPToolsOpsBot
-          author_email: lmptoolsopsbot@users.noreply.github.com
+          author_name: Venkat Bala
+          author_email: 15014089+venkatBala@users.noreply.github.com
           message: ${{ steps.update_changelog.outputs.message }}
           push: origin develop --force
