@@ -8,6 +8,7 @@
 - Added a hard check to force `CHANGELOG` to be updated as part of PRs
 - Added `changelog` release step in `changelog.yml`
 - Creating a PR with the changes to be merged into `develop`
+- Adding merge PR action
 
 ### Changed
 
