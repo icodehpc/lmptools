@@ -6,7 +6,6 @@ on:
     branches:
       - develop
     paths-ignore:
-      - "CHANGELOG.md"
       - "VERSION"
       - ".github/**"
       - ".pre-commit-config.yaml"
