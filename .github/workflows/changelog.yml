@@ -70,6 +70,7 @@ jobs:
           # Update version
           VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
           echo $VERSION > ./VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create release changelog
         id: update_changelog
@@ -82,7 +83,7 @@ jobs:
         with:
           branch: "bot-update-changelog-version-pr"
           delete-branch: true
-          title: "[CI] Changelog update for $VERSION"
+          title: "[CI] Changelog update for ${{ env.VERSION }}"
           reviewers: venkatBala
           add-paths: |
             CHANGELOG.md

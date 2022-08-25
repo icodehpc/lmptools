@@ -21,3 +21,4 @@
 
 - Update changelog parsing logic
 - Fixed `release changelog` block in `changelog.yml`
+- Fixed `VERSION` interpolation in PR title
