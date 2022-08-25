@@ -85,3 +85,4 @@ jobs:
           author_email: "15014089+venkatBala@users.noreply.github.com"
           message: "${{ steps.update_changelog.outputs.message }}"
           push: origin develop --force
+          ref: ${{ github.event.pull_request.head.ref }}
