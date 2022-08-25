@@ -77,11 +77,22 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Commit the new changes
-        if: ${{ steps.update_changelog.outputs.message != 'noop' }}
-        uses: EndBug/add-and-commit@v9
+      - name: Create PR with update changelog and version
+        uses: peter-evans/create-pull-request@v4
         with:
-          author_name: "Venkat Bala"
-          author_email: "15014089+venkatBala@users.noreply.github.com"
-          message: "${{ steps.update_changelog.outputs.message }}"
-          push: origin develop --force
+          branch: "bot-update-changelog-version-pr"
+          delete-branch: true
+          title: "[CI] Changelog update for $VERSION"
+          reviewers: venkatBala
+          add-paths: |
+            CHANGELOG.md
+            VERSION
+
+      #- name: Commit the new changes
+      #  if: ${{ steps.update_changelog.outputs.message != 'noop' }}
+      #  uses: EndBug/add-and-commit@v9
+      #  with:
+      #    author_name: "Venkat Bala"
+      #    author_email: "15014089+venkatBala@users.noreply.github.com"
+      #    message: "${{ steps.update_changelog.outputs.message }}"
+      #    push: origin develop --force
