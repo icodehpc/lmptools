@@ -5,6 +5,9 @@ on:
     paths-ignore:
       - ".github/**"
       - "examples/**"
+  workflow_run:
+    workflows: [changelog]
+    types: [completed]
 
 jobs:
   tests:
@@ -94,3 +97,11 @@ jobs:
           fi
           echo "RELEASE=$release" >> $GITHUB_ENV
           echo "::set-output name=release::$release"
+
+  release:
+    needs: tests
+    if: github.ref == 'refs/heads/develop'
+    uses: venkatBala/lmptools/.github/workflows/release.yml@develop
+    secrets: inherit
+    with:
+      prerelease: true
