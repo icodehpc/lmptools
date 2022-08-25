@@ -82,4 +82,4 @@ jobs:
           author_name: "Venkat Bala"
           author_email: "15014089+venkatBala@users.noreply.github.com"
           message: "${{ steps.update_changelog.outputs.message }}"
-          push: true
+          push: origin ${{ env.GITHUB_HEAD_REF }} --force
