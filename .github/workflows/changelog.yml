@@ -1,12 +1,19 @@
 name: changelog
 
 on:
+  workflow_call:
   push:
     branches:
       - develop
     paths-ignore:
       - "CHANGELOG.md"
       - "VERSION"
+      - ".github/**"
+      - "tests/**"
+      - ".pre-commit-config.yaml"
+      - ".gitignore"
+      - "*.md"
+      - "LICENSE"
 
 jobs:
   changelog:
