@@ -10,6 +10,8 @@
 
 - Update `triggers` on `changelog` workflow
 
+- Remove markdown ignore from ignored files
+
 ### Docs
 
 - Updated `README` by adding reference to CONTRIBUTING.md

@@ -10,7 +10,6 @@ on:
       - ".github/**"
       - ".pre-commit-config.yaml"
       - ".gitignore"
-      - "*.md"
       - "LICENSE"
 
 jobs:
