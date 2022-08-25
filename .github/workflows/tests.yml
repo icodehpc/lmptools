@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - ".github/**"
       - "examples/**"
+      - "*.md"
   workflow_run:
     workflows: [changelog]
     types: [completed]
