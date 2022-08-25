@@ -1,16 +1,14 @@
 name: changelog
 
 on:
-  workflow_call:
-  push:
-    branches:
-      - develop
+  pull_request:
     paths-ignore:
       - "VERSION"
       - ".github/**"
       - ".pre-commit-config.yaml"
       - ".gitignore"
       - "LICENSE"
+  workflow_call:
 
 jobs:
   changelog:
@@ -84,7 +82,7 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Commit the new changes to develop
+      - name: Commit the new changes
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}
         uses: EndBug/add-and-commit@v9
         with:
@@ -92,3 +90,4 @@ jobs:
           author_email: 15014089+venkatBala@users.noreply.github.com
           message: ${{ steps.update_changelog.outputs.message }}
           push: origin develop --force
+          ref: ${{ github.event.pull_request.head.ref }}
