@@ -86,3 +86,11 @@ jobs:
           author_email: lmptoolsopsbot@users.noreply.github.com
           message: ${{ steps.updateChangelog.outputs.message }}
           push: origin develop --force
+
+    release:
+      needs: changelog
+      if: github.ref == 'refs/heads/develop'
+      uses: venkatBala/lmptools/.github/workflows/release.yml@develop
+      secrets: inherit
+      with:
+        prerelease: true

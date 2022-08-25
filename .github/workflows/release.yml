@@ -13,12 +13,13 @@ jobs:
   github:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout master
+      - name: Checkout develop
         uses: action/checkout@v3
         if: inputs.prerelease
         with:
           persist-credentials: false
           fetch-depth: 0
+          ref: develop
 
       - name: Parse version
         run: |
@@ -40,4 +41,3 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag.outputs.changelog }}
           prerelease: true
-          tag: ${{ env.VERSION }}
