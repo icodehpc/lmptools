@@ -80,6 +80,7 @@ jobs:
 
       - name: Create PR with update changelog and version
         uses: peter-evans/create-pull-request@v4
+        id: changelog_version_pr
         with:
           branch: "bot-update-changelog-version-pr"
           delete-branch: true
@@ -89,11 +90,10 @@ jobs:
             CHANGELOG.md
             VERSION
 
-      #- name: Commit the new changes
-      #  if: ${{ steps.update_changelog.outputs.message != 'noop' }}
-      #  uses: EndBug/add-and-commit@v9
-      #  with:
-      #    author_name: "Venkat Bala"
-      #    author_email: "15014089+venkatBala@users.noreply.github.com"
-      #    message: "${{ steps.update_changelog.outputs.message }}"
-      #    push: origin develop --force
+      - name: Merge Changelog/VERSION pull request
+        uses: juliangruber/merge-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.changelog_version_pr.outputs.pull_request_number }}
+          method: squash
+          repo: venkatBala/lmptools
