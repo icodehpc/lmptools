@@ -2,6 +2,9 @@ name: tests
 
 on:
   pull_request:
+    paths-ignore:
+      - ".github/**"
+      - "examples/**"
 
 jobs:
   tests:
