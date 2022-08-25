@@ -16,3 +16,4 @@
 
 ### Fixed
 
+- Update changelog parsing logic
