@@ -8,6 +8,8 @@
 
 - Added a hard check to force `CHANGELOG` to be updated as part of PRs
 
+- Update `triggers` on `changelog` workflow
+
 ### Docs
 
 - Updated `README` by adding reference to CONTRIBUTING.md
