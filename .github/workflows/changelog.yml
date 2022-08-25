@@ -90,6 +90,13 @@ jobs:
             CHANGELOG.md
             VERSION
 
+      - name: Approve Changelog/VERSION pull request
+        uses: juliangruber/approve-pull-request-action@v1.1.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ env.PULL_REQUEST_NUMBER }}
+          repo: venkatBala/lmptools
+
       - name: Merge Changelog/VERSION pull request
         uses: juliangruber/merge-pull-request-action@v1
         with:
