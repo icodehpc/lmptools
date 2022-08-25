@@ -25,3 +25,8 @@ jobs:
             Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the [Unreleased] section
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  changelog:
+    needs: remind
+    uses: venkatBala/lmptools/.github/workflows/changelog.yml
+    secrets: inherit
