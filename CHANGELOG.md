@@ -17,6 +17,7 @@
 - Updated `README` by adding reference to CONTRIBUTING.md
 - Updated `changelog` trigger to be `workflow_call`
 - Fix PR merge action `pull_number` input
+- Use `PULL_REQUEST_NUMBER` instead of step output
 
 
 ### Fixed
