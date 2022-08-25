@@ -13,6 +13,7 @@
 - Update `triggers` on `changelog` workflow
 - Remove markdown ignore from ignored files
 - Updated `README` by adding reference to CONTRIBUTING.md
+- Updated `changelog` trigger to be `workflow_call`
 
 
 ### Fixed
