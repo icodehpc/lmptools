@@ -1,0 +1,43 @@
+name: release
+
+on:
+  workflow_call:
+  inputs:
+    prerelease:
+      description: "True creates a pre-release; False in the case of a stable release"
+      required: true
+      type: boolean
+      default: true
+
+jobs:
+  github:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: action/checkout@v3
+        if: inputs.prerelease
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: develop
+
+      - name: Parse version
+        run: |
+          VERSION="$(cat ./VERSION)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create a release tag
+        if: inputs.prerelease
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ env.VERSION }}
+
+      - name: Create GitHub pre-release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag.outputs.changelog }}
+          prerelease: true
