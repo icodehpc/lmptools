@@ -18,3 +18,4 @@
 ### Fixed
 
 - Update changelog parsing logic
+- Fixed `release changelog` block in `changelog.yml`
