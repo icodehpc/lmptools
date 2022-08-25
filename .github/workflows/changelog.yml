@@ -65,6 +65,7 @@ jobs:
             echo '::set-output name=message::Minor version will be incremented'
             MINOR_VERSION=$((MINOR_VERSION+1))
           elif [[ "${HEADERS[@]}" =~ "Fixed" ]] || [[ "${HEADERS[@]}" =~ "Security" ]]
+          then
             echo '::set-output name=message::Patch version will be incremented'
             PATCH_VERSION=$((PATCH_VERSION+1))
           else
@@ -73,7 +74,7 @@ jobs:
 
           # Update version
           VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
-          echo $VERSION > VERSION
+          echo $VERSION > ./VERSION
 
       - name: Commit the new version to develop
         if: ${{ steps.update_changelog.outputs.message != 'noop' }}
