@@ -9,6 +9,7 @@
 - Added `changelog` release step in `changelog.yml`
 - Creating a PR with the changes to be merged into `develop`
 - Adding merge PR action
+- Adding PR approve action
 
 ### Changed
 
