@@ -1,29 +1,23 @@
 name: Changelog reminder
 
 on:
-  pull_request:
+  workflow_call:
+    inputs:
+      remind_user:
+        type: boolean
+        required: true
 
 jobs:
   remind:
     name: Changelog reminder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-
-      - name: Changelog check
-        id: changelog_check
-        uses: Zomzog/changelog-checker@v1.2.0
-        with:
-          fileName: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Changelog Reminder
-        id: reminder
+        if: ${{ inputs.remind_user }}
         uses: peterjgrainger/action-changelog-reminder@v1.3.0
         with:
           changelog_regex: "CHANGELOG.md"
           customPrMessage: |
-            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the [Unreleased] section
+            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the `[Unreleased]` section
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
