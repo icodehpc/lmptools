@@ -2,6 +2,9 @@ name: changelog
 
 on:
   pull_request:
+  workflow_run:
+    workflows: [changelog_check, changelog_reminder]
+    types: [completed]
 
 jobs:
   changelog:
@@ -75,6 +78,10 @@ jobs:
         run: |
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
+
+      - name: Check env var
+        run: |
+          echo "Branch name is ${GITHUB_HEAD_REF}"
 
       - name: Commit changes to $GITHUB_HEAD_REF
         if: steps.update_changelog.outcome == 'success'
