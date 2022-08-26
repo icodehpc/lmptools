@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Remove action to create PR with changes
+- Merge changes into PR source branch
+
 ### Added
 
 - Add `CODEOWNERS` file

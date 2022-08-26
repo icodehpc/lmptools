@@ -1,9 +1,10 @@
 name: changelog
 
 on:
-  push:
-    branches:
-      - "develop"
+  pull_request:
+  workflow_run:
+    workflows: [changelog_check, changelog_reminder]
+    types: [completed]
 
 jobs:
   changelog:
@@ -78,29 +79,11 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Create PR with update changelog and version
-        uses: peter-evans/create-pull-request@v4
-        id: changelog_version_pr
-        with:
-          branch: "bot-update-changelog-version-pr"
-          delete-branch: true
-          title: "[CI] Changelog update for ${{ env.VERSION }}"
-          reviewers: venkatBala
-          add-paths: |
-            CHANGELOG.md
-            VERSION
-
-      - name: Approve Changelog/VERSION pull request
-        uses: juliangruber/approve-pull-request-action@v1.1.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ env.PULL_REQUEST_NUMBER }}
-          repo: venkatBala/lmptools
-
-      - name: Merge Changelog/VERSION pull request
-        uses: juliangruber/merge-pull-request-action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ env.PULL_REQUEST_NUMBER }}
-          method: squash
-          repo: venkatBala/lmptools
+      - name: Commit changes
+        if: steps.update_changelog.outcome == 'success'
+        run: |
+          git config user.name "LMPToolsOpsBot"
+          git config user.email "112046753+LMPToolsOpsBot@users.noreply.github.com"
+          git add .
+          git commit -m "changelog/version updated to ${{ env.VERSION }}"
+          git push origin $GITHUB_HEAD_REF --force
