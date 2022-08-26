@@ -1,9 +1,7 @@
 name: changelog
 
 on:
-  push:
-    branches:
-      - "develop"
+  pull_request:
 
 jobs:
   changelog:
