@@ -9,6 +9,10 @@
 
 ### Added
 
+- Add `CODEOWNERS` file
+
+### Added
+
 - Adding `changelog.yml` workflow to enable automatic versioning
 - Added a hard check to force `CHANGELOG` to be updated as part of PRs
 - Added `changelog` release step in `changelog.yml`
