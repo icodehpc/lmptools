@@ -79,11 +79,11 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Commit changes to '$GITHUB_HEAD_REF'
+      - name: Commit changes
         if: steps.update_changelog.outcome == 'success'
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: "[LMPToolsOpsBot] changelog/version update to ${{ env.VERSION }}"
-          author_name: "LMPToolsOpsBot"
-          author_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
-          push: origin "${GITHUB_HEAD_REF}" --force
+        run: |
+          git config user.name "LMPToolsOpsBot"
+          git config user.email "112046753+LMPToolsOpsBot@users.noreply.github.com"
+          git add .
+          git commit -m "changelog/version updated to ${{ env.VERSION }}"
+          git push origin $GITHUB_HEAD_REF --force
