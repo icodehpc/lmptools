@@ -1,13 +1,12 @@
 name: release
 
 on:
-  workflow_call:
-    inputs:
-      prerelease:
-        description: "True creates a pre-release; False in the case of a stable release"
-        required: true
-        type: boolean
-        default: true
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - ".github/**"
+      - "tests/**"
 
 jobs:
   github:
