@@ -21,6 +21,6 @@ jobs:
 
       - name: Invoke reminder
         if: ${{ steps.changelog_check.outcome == 'failed' }}
-        uses: .github/workflows/changelog_reminder.yml
+        uses: venkatBala/lmptools/.github/workflows/changelog_reminder.yml@develop
         with:
           changelog_updated: false
