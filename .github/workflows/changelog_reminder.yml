@@ -4,9 +4,8 @@ on:
   workflow_call:
     inputs:
       remind_user:
-        description: Boolean flag to show whether changelog was updated or not
         type: boolean
-        default: false
+        required: true
 
 jobs:
   remind:
@@ -19,6 +18,6 @@ jobs:
         with:
           changelog_regex: "CHANGELOG.md"
           customPrMessage: |
-            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the [Unreleased] section
+            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the `[Unreleased]` section
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
