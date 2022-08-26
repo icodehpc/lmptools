@@ -83,4 +83,4 @@ jobs:
           message: "[LMPToolsOpsBot] changelog/version update to ${{ env.VERSION }}"
           author_name: "LMPToolsOpsBot"
           author_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
-          push: origin $GITHUB_HEAD_REF --force
+          push: true
