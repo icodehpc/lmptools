@@ -78,29 +78,11 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Create PR with update changelog and version
-        uses: peter-evans/create-pull-request@v4
-        id: changelog_version_pr
+      - name: Commit changes to $GITHUB_HEAD_REF
+        if: steps.update_changelog.outcome == 'success'
+        uses: EndBug/add-and-commit@v9
         with:
-          branch: "bot-update-changelog-version-pr"
-          delete-branch: true
-          title: "[CI] Changelog update for ${{ env.VERSION }}"
-          reviewers: venkatBala
-          add-paths: |
-            CHANGELOG.md
-            VERSION
-
-      - name: Approve Changelog/VERSION pull request
-        uses: juliangruber/approve-pull-request-action@v1.1.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ env.PULL_REQUEST_NUMBER }}
-          repo: venkatBala/lmptools
-
-      - name: Merge Changelog/VERSION pull request
-        uses: juliangruber/merge-pull-request-action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ env.PULL_REQUEST_NUMBER }}
-          method: squash
-          repo: venkatBala/lmptools
+          message: "[LMPToolsOpsBot] changelog/version update to ${{ env.VERSION }}"
+          author_name: "LMPToolsOpsBot"
+          author_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
+          push: origin $GITHUB_HEAD_REF --force
