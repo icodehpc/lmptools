@@ -7,6 +7,8 @@ jobs:
   check:
     name: changelog-check
     runs-on: ubuntu-latest
+    ouptuts:
+      changelog_updated: ${{ steps.changelog_check.outcome }}
     steps:
       - name: checkout
         uses: actions/checkout@master
@@ -19,8 +21,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Invoke reminder
-        if: ${{ steps.changelog_check.outcome == 'failed' }}
-        uses: venkatBala/lmptools/.github/workflows/changelog_reminder.yml@develop
-        with:
-          changelog_updated: false
+  reminder:
+    needs: check
+    if: github.ref == 'refs/heads/develop' && needs.check.outputs.changelog_updated == 'failed'
+    uses: venkatBala/lmptools/.github/workflows/changelog_reminder.yml@develop
+    secrets: inherit # pragma: allowlist secret
+    with:
+      remind_user: true
