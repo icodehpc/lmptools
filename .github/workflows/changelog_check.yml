@@ -7,7 +7,7 @@ jobs:
   check:
     name: changelog-check
     runs-on: ubuntu-latest
-    ouptuts:
+    outputs:
       changelog_updated: ${{ steps.changelog_check.outcome }}
     steps:
       - name: checkout
