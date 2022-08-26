@@ -2,14 +2,38 @@ name: changelog
 
 on:
   pull_request:
-  workflow_run:
-    workflows: [changelog_check, changelog_reminder]
-    types: [completed]
 
 jobs:
-  changelog:
+  check_and_remind:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
+
+      - name: Check if CHANGELOG.md was updated
+        id: changelog_update_check
+        uses: Zomzog/changelog-checker@v1.2.0
+        with:
+          fileName: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add reminder to update
+        if: steps.changelog_update_check.outcome == 'failed'
+        id: changelog_update_reminder
+        uses: peterjgrainger/action-changelog-reminder@v1.3.0
+        with:
+          changelog_regex: "CHANGELOG.md"
+          customPrMessage: |
+            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the `[Unreleased]` section
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  changelog:
+    runs-on: ubuntu-latest
+    needs: check_and_remind
+    steps:
+      - uses: action/checkout@master
+
       - name: Setup Golang
         uses: actions/setup-go@v3
         with:
@@ -82,6 +106,7 @@ jobs:
       - name: Commit changes
         if: steps.update_changelog.outcome == 'success'
         run: |
+          git checkout $GITHUB_HEAD_REF
           git config user.name "LMPToolsOpsBot"
           git config user.email "112046753+LMPToolsOpsBot@users.noreply.github.com"
           git add .
