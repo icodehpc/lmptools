@@ -1,0 +1,26 @@
+name: Changelog check
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    name: changelog-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: Check if changelog was modified
+        id: changelog_check
+        uses: Zomzog/changelog-checker@v1.2.0
+        with:
+          fileName: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Invoke reminder
+        if: ${{ steps.changelog_check.outcome == 'failed' }}
+        uses: .github/workflows/changelog_reminder.yml
+        with:
+          changelog_updated: false

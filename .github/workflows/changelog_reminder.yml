@@ -1,25 +1,20 @@
 name: Changelog reminder
 
 on:
-  pull_request:
+  workflow_call:
+    inputs:
+      changelog_updated:
+        description: Boolean flag to show whether changelog was updated or not
+        type: boolean
+        default: false
 
 jobs:
   remind:
     name: Changelog reminder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-
-      - name: Changelog check
-        id: changelog_check
-        uses: Zomzog/changelog-checker@v1.2.0
-        with:
-          fileName: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Changelog Reminder
-        id: reminder
+        if: ${{ !inputs.changelog_updated }}
         uses: peterjgrainger/action-changelog-reminder@v1.3.0
         with:
           changelog_regex: "CHANGELOG.md"
