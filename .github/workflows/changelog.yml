@@ -2,14 +2,19 @@ name: changelog
 
 on:
   pull_request:
-  workflow_run:
-    workflows: [changelog_check, changelog_reminder]
-    types: [completed]
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: dangoslen/changelog-enforcer@v3
+        with:
+          missingUpdateErrorMessage: "CHANGELOG.md not updated"
+
       - name: Setup Golang
         uses: actions/setup-go@v3
         with:
@@ -27,9 +32,6 @@ jobs:
           go install
           export PATH=$PATH:$HOME/go/bin
         working-directory: ./changelog
-
-      - name: Checkout
-        uses: actions/checkout@v3
 
       - name: Parse Unreleased header to determine version update
         id: update_version
@@ -79,11 +81,10 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
-      - name: Commit changes
-        if: steps.update_changelog.outcome == 'success'
-        run: |
-          git config user.name "LMPToolsOpsBot"
-          git config user.email "112046753+LMPToolsOpsBot@users.noreply.github.com"
-          git add .
-          git commit -m "changelog/version updated to ${{ env.VERSION }}"
-          git push origin $GITHUB_HEAD_REF --force
+      - name: Autocommit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update changelog/version to v${{ env.VERSION }}"
+          branch: ${{ github.head_ref }}
+          commit_user_name: "LMPToolsOpsBot"
+          commit_user_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
