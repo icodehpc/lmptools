@@ -4,8 +4,11 @@
 
 ### Changed
 
-- Updated `tests.yml` workflow by removing macos container
 - default `continue_on_error` workflow option
+
+## [0.9.5] - 2022-08-27
+### Changed
+- Updated `tests.yml` workflow by removing macos container
 
 ## [0.8.5] - 2022-08-27
 ### Added
@@ -61,7 +64,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/e17f86f4f2ac71f2d98c14b19ce4713235fcd116...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/d2c7a576c3ebe81c6c6b0483e0cbf247ece979af...develop
+[0.9.5]: https://github.com/venkatBala/lmptools/changelog/compare/e17f86f4f2ac71f2d98c14b19ce4713235fcd116...develop
 [0.8.5]: https://github.com/venkatBala/lmptools/changelog/compare/1de7563d806d46a71b8d0c3be14a34035f9caa80...develop
 [0.7.5]: https://github.com/venkatBala/lmptools/changelog/compare/34c410fb7c5a45a0c0e261953d76e0c1e9b5422d...develop
 [0.6.5]: https://github.com/venkatBala/lmptools/changelog/compare/7e443f8160ac79d3ca85be1b93180e1c58848e02...develop
