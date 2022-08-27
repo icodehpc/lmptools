@@ -6,6 +6,7 @@
 ### Changed
 
 - Trigger for `changelog` workflow
+- Updated the commit user name and email
 ### Removed
 
 - removed reference to github head ref
