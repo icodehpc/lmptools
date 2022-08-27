@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+
+### Changed
+
+- Trigger for `changelog` workflow
+### Removed
+
+- removed reference to github head ref
+
 ## [0.5.5] - 2022-08-27
 ### Changed
 - Updated `changelog.yml` workflow to cleanup any temporary directories created
