@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added new worklow to enforce changelog updates
+
+
+### Changed
+
+- updated `changelog` workflow by removing the changelog check action
+
 ## [0.6.5] - 2022-08-27
 ### Changed
 - changed the add and commit github action

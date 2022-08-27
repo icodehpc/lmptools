@@ -13,10 +13,6 @@ jobs:
         with:
           token: ${{ secrets.ADMIN_TOKEN }}
 
-      - uses: dangoslen/changelog-enforcer@v3
-        with:
-          missingUpdateErrorMessage: "CHANGELOG.md not updated"
-
       - name: Setup Golang
         uses: actions/setup-go@v3
         with:

@@ -1,12 +1,11 @@
 name: release
 
 on:
-  push:
-    branches:
-      - develop
-    paths-ignore:
-      - ".github/**"
-      - "tests/**"
+  workflow_call:
+    inputs:
+      prerelease:
+        type: boolean
+        default: true
 
 jobs:
   github:
