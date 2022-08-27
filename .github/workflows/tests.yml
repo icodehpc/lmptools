@@ -23,7 +23,7 @@ jobs:
           - python:3.9-buster
           - python:3.9-bullseye
     container: ${{ matrix.container }}
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: false
     outputs:
       release: ${{ steps.push.outputs.release }}
     steps:

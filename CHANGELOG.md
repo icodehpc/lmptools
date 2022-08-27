@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- default `continue_on_error` workflow option
+
 ## [0.9.5] - 2022-08-27
 ### Changed
 - Updated `tests.yml` workflow by removing macos container
