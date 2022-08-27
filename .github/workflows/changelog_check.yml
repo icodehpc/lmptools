@@ -13,7 +13,7 @@ jobs:
           missingUpdateErrorMessage: "CHANGELOG.md not updated"
 
       - name: Changelog Reminder
-        if: steps.changelog_check.outcome  == 'failed'
+        if: failure()
         uses: peterjgrainger/action-changelog-reminder@v1.2.0
         with:
           changelog_regex: "CHANGELOG.md"
