@@ -1,15 +1,15 @@
 name: changelog
 
 on:
-  pull_request:
+  push:
+    branches:
+      - "develop"
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-        with:
-          ref: ${{ github.head_ref }}
 
       - uses: dangoslen/changelog-enforcer@v3
         with:
@@ -87,6 +87,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Update changelog/version to v${{ env.VERSION }}"
-          branch: ${{ github.head_ref }}
+          branch: develop
           commit_user_name: "LMPToolsOpsBot"
           commit_user_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
