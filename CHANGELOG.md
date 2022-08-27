@@ -2,8 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.5] - 2022-08-27
 ### Added
-
 - Adding workflow step to add a changelog reminder to the PR
 
 ## [0.10.5] - 2022-08-27
@@ -68,7 +68,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/f68bab2603b9424a8f61308dbfdc8f92520f40eb...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/69512ae827611a030574edb1700fae3c5be7d70f...develop
+[0.11.5]: https://github.com/venkatBala/lmptools/changelog/compare/f68bab2603b9424a8f61308dbfdc8f92520f40eb...develop
 [0.10.5]: https://github.com/venkatBala/lmptools/changelog/compare/d2c7a576c3ebe81c6c6b0483e0cbf247ece979af...develop
 [0.9.5]: https://github.com/venkatBala/lmptools/changelog/compare/e17f86f4f2ac71f2d98c14b19ce4713235fcd116...develop
 [0.8.5]: https://github.com/venkatBala/lmptools/changelog/compare/1de7563d806d46a71b8d0c3be14a34035f9caa80...develop
