@@ -79,6 +79,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create release changelog
+        if: ${{ steps.update_version.outputs.message != 'noop' }}
         id: update_changelog
         run: |
           VERSION=$(cat ./VERSION)
@@ -87,15 +88,10 @@ jobs:
           rm -rf changelog
 
       - name: Autocommit changes
+        if: ${{ steps.update_changelog.outcome == 'success' }}
         uses: EndBug/add-and-commit@v9
         with:
           author_name: "Venkat Bala"
           author_email: "15014089+venkatBala@users.noreply.github.com"
           message: "Update changelog/version to v${{ env.VERSION }}"
           push: origin develop --force
-        #uses: stefanzweifel/git-auto-commit-action@v4
-        #with:
-        #  commit_message: "Update changelog/version to v${{ env.VERSION }}"
-        #  branch: develop
-        #  commit_user_name: "Venkat Bala"
-        #  commit_user_email: "15014089+venkatBala@users.noreply.github.com"
