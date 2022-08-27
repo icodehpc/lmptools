@@ -8,5 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: dangoslen/changelog-enforcer@v3
+        id: changelog_check
         with:
           missingUpdateErrorMessage: "CHANGELOG.md not updated"
+
+      - name: Changelog Reminder
+        if: steps.changelog_check.outcome  == 'failed'
+        uses: peterjgrainger/action-changelog-reminder@v1.2.0
+        with:
+          changelog_regex: 'CHANGELOG.md'
+          customPrMessage: 'CHANGELOG not updated. Please describe the changes being introduced in thie pull request in the `Unreleased` section'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
