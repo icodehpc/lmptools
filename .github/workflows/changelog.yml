@@ -83,6 +83,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Update changelog/version to v${{ env.VERSION }}"
-          branch: $GITHUB_HEAD_REF
+          branch: "${GITHUB_HEAD_REF}"
           commit_user_name: "LMPToolsOpsBot"
           commit_user_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
