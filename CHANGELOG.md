@@ -5,6 +5,7 @@
 ### Removed
 
 - Removed `changelog_reminder` and `changelog_check` workflows
+- cleanup empty dir
 
 ### Changed
 
