@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `tests` and `release` workflow with logic to run from the `release` branch instead of main
+
 ## [0.11.5] - 2022-08-27
 ### Added
 - Adding workflow step to add a changelog reminder to the PR
