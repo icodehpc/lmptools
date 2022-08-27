@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `changelog.yml` workflow to cleanup any temporary directories created
+
 ## 0.4.5 - 2022-08-27
 ### Added
 - Add `CODEOWNERS` file
