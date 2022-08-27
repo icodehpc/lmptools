@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `tests.yml` workflow by removing macos container
+
 ## [0.8.5] - 2022-08-27
 ### Added
 - updating paths-ignored on which not to trigger changelog workflow
