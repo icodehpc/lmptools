@@ -2,8 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.5] - 2022-08-27
 ### Changed
-
 - Updated `changelog.yml` workflow to cleanup any temporary directories created
 
 ## 0.4.5 - 2022-08-27
@@ -35,4 +35,5 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/78ae5046d386cd6fed4492a8874e0a9da59ac1d0...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/7e443f8160ac79d3ca85be1b93180e1c58848e02...develop
+[0.5.5]: https://github.com/venkatBala/lmptools/changelog/compare/78ae5046d386cd6fed4492a8874e0a9da59ac1d0...develop
