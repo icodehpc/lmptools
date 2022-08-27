@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- updating paths-ignored on which not to trigger changelog workflow
+
 ## [0.7.5] - 2022-08-27
 ### Added
 - Added new worklow to enforce changelog updates
