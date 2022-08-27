@@ -14,6 +14,7 @@ jobs:
           missingUpdateErrorMessage: "CHANGELOG.md not updated"
 
   changelog:
+    needs: changelog_check
     runs-on: ubuntu
     steps:
       - uses: actions/checkout@master

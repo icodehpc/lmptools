@@ -2,10 +2,14 @@
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `changelog_reminder` and `changelog_check` workflows
+
 ### Changed
 
 - Remove action to create PR with changes
-- Merge changes into PR source branch
+- Merge changes into PR source
 
 ### Added
 
