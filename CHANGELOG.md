@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Run `release` workflow from `develop` itself
+
 ## [0.12.5] - 2022-08-27
 ### Changed
 - Updated `tests` and `release` workflow with logic to run from the `release` branch instead of main
