@@ -13,12 +13,6 @@ jobs:
         with:
           missingUpdateErrorMessage: "CHANGELOG.md not updated"
 
-  changelog:
-    needs: changelog_check
-    runs-on: ubuntu
-    steps:
-      - uses: actions/checkout@master
-
       - name: Setup Golang
         uses: actions/setup-go@v3
         with:
