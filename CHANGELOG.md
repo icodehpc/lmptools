@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- changed the add and commit github action
+
 
 ### Changed
 
