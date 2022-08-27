@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Adding workflow step to add a changelog reminder to the PR
+
 ## [0.10.5] - 2022-08-27
 ### Changed
 - default `continue_on_error` workflow option
