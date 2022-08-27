@@ -5,6 +5,7 @@
 ### Added
 
 - updating paths-ignored on which not to trigger changelog workflow
+- add `if` guards around commit and update changelog steps
 
 ## [0.7.5] - 2022-08-27
 ### Added

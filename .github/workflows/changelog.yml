@@ -6,8 +6,6 @@ on:
       - "develop"
     paths-ignore:
       - "CHANGELOG.md"
-      - ".github/**"
-      - "tests/**"
       - "VERSION"
 
 jobs:
