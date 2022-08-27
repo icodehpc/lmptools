@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Remove `push to main`
+
 ## [0.13.5] - 2022-08-27
 ### Changed
 - Run `release` workflow from `develop` itself
