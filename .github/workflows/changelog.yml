@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  changelog:
+  changelog_check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -13,16 +13,10 @@ jobs:
         with:
           missingUpdateErrorMessage: "CHANGELOG.md not updated"
 
-      - name: Add reminder to update
-        if: steps.changelog_update_check.outputs.status == false
-        id: changelog_update_reminder
-        uses: peterjgrainger/action-changelog-reminder@v1.3.0
-        with:
-          changelog_regex: "CHANGELOG.md"
-          customPrMessage: |
-            Please update the [`CHANGELOG.md`](/venkatBala/lmptools/blob/master/CHANGELOG.md) with the changes being made as part of this PR in the `[Unreleased]` section
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  changelog:
+    runs-on: ubuntu
+    steps:
+      - uses: actions/checkout@master
 
       - name: Setup Golang
         uses: actions/setup-go@v3
@@ -43,7 +37,6 @@ jobs:
         working-directory: ./changelog
 
       - name: Parse Unreleased header to determine version update
-        if: steps.changelog_update_check.outputs.status == 'true'
         id: update_version
         run: |
           # Current version
@@ -86,14 +79,12 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create release changelog
-        if: steps.changelog_update_check.outputs.status == 'true'
         id: update_changelog
         run: |
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md
 
       - name: Commit changes
-        if: steps.changelog_update_check.outputs.status == 'true'
         run: |
           git checkout $GITHUB_HEAD_REF
           git config user.name "LMPToolsOpsBot"
