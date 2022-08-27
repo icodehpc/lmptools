@@ -16,7 +16,7 @@ jobs:
         if: steps.changelog_check.outcome  == 'failed'
         uses: peterjgrainger/action-changelog-reminder@v1.2.0
         with:
-          changelog_regex: 'CHANGELOG.md'
-          customPrMessage: 'CHANGELOG not updated. Please describe the changes being introduced in thie pull request in the `Unreleased` section'
+          changelog_regex: "CHANGELOG.md"
+          customPrMessage: "CHANGELOG not updated. Please describe the changes being introduced in thie pull request in the `Unreleased` section"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
