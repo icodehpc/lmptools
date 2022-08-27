@@ -91,8 +91,8 @@ jobs:
 
   release:
     needs: tests
-    if: github.ref == 'refs/heads/develop'
-    uses: venkatBala/lmptools/.github/workflows/release.yml@develop
+    if: github.ref == 'refs/heads/release'
+    uses: venkatBala/lmptools/.github/workflows/release.yml@release
     secrets: inherit
     with:
       prerelease: true

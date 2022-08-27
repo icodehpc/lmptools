@@ -11,14 +11,13 @@ jobs:
   github:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout develop
+      - name: Checkout release branch
         uses: actions/checkout@v3
         if: inputs.prerelease
         with:
-          ref: release
           persist-credentials: false
           fetch-depth: 0
-          ref: develop
+          ref: release
 
       - name: Parse version
         run: |
