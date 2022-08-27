@@ -81,6 +81,7 @@ jobs:
           VERSION=$(cat ./VERSION)
           ~/go/bin/changelog release $VERSION -c https://github.com/venkatBala/lmptools/changelog/compare/$GITHUB_SHA...develop -f ./CHANGELOG.md | tee temp_changelog.md
           mv temp_changelog.md CHANGELOG.md
+          rm -rf changelog
 
       - name: Autocommit changes
         uses: stefanzweifel/git-auto-commit-action@v4
