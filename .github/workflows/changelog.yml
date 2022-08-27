@@ -88,5 +88,5 @@ jobs:
         with:
           commit_message: "Update changelog/version to v${{ env.VERSION }}"
           branch: develop
-          commit_user_name: "LMPToolsOpsBot"
-          commit_user_email: "112046753+LMPToolsOpsBot@users.noreply.github.com"
+          commit_user_name: "Venkat Bala"
+          commit_user_email: "15014089+venkatBala@users.noreply.github.com"
