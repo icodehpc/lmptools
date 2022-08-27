@@ -22,11 +22,6 @@ jobs:
           - python:3.8-bullseye
           - python:3.9-buster
           - python:3.9-bullseye
-        experimental: [false]
-        include:
-          - os: macos-latest
-            python-version: "3.8"
-            experimental: false
     container: ${{ matrix.container }}
     continue-on-error: ${{ matrix.experimental }}
     outputs:
@@ -36,12 +31,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: false
-
-      - name: Setup Python
-        if: matrix.os == 'macos-latest'
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+          token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Install package dependencies
         run: |
