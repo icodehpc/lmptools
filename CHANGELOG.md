@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `release` step in `tests.yml` workflow
+
+### Added
+
+- Adding `echo` statements for debugging
+
 ## [0.14.5] - 2022-09-05
 ### Added
 - Added abstract class for defining a `DumpFileParser`
