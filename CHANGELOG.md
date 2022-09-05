@@ -2,13 +2,12 @@
 
 ## [Unreleased]
 
-### Changed
-
-- Updated `release` step in `tests.yml` workflow
-
+## [0.15.5] - 2022-09-05
 ### Added
-
 - Adding `echo` statements for debugging
+
+### Changed
+- Updated `release` step in `tests.yml` workflow
 
 ## [0.14.5] - 2022-09-05
 ### Added
@@ -92,7 +91,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/72428fad4c742a332e404abc8b65210137027760...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/85b0a03cc4c6c0bc4ccc978179ccc3bd0ba20ee4...develop
+[0.15.5]: https://github.com/venkatBala/lmptools/changelog/compare/72428fad4c742a332e404abc8b65210137027760...develop
 [0.14.5]: https://github.com/venkatBala/lmptools/changelog/compare/5bd6ed39675d545bb9665f29c2cf9622e1077d49...develop
 [0.13.5]: https://github.com/venkatBala/lmptools/changelog/compare/e7cec797995cf0afbc839c072b64fdef7b0e6b01...develop
 [0.12.5]: https://github.com/venkatBala/lmptools/changelog/compare/69512ae827611a030574edb1700fae3c5be7d70f...develop
