@@ -75,7 +75,7 @@ jobs:
         id: push
         if: github.ref == 'refs/heads/develop' && matrix.os == 'ubuntu-20.04' && matrix.container == 'python:3.9-buster'
         run: |
-          MASTER_VERSION="$(echo ${{ steps.get-latest-tag.outputs.tag }} | cut -c2- )"
+          MASTER_VERSION="$(echo '${{ steps.get-latest-tag.outputs.tag }}'' | cut -c2- )"
           VERSION=$(cat ./VERSION)"
           echo "MASTER_VERSION = ${MASTER_VERSION}"
           echo "VERSION = ${VERSION}"
