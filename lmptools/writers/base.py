@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from ..core.simulation import DumpSnapshot
 from ..dump.base import DumpCallback
 
 
-class SnapshotWriter(ABC, DumpCallback):
+class SnapshotWriter(DumpCallback):
     """Abstract base class for implementing a snapshot writer"""
 
     @abstractmethod

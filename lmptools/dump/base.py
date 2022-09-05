@@ -114,12 +114,12 @@ class Dump(DumpFileParser):
 
     def __init__(
         self,
-        dump_file_name: str,
-        callback: DumpCallback,
+        filename: str,
+        callback: Optional[DumpCallback] = None,
         unwrap: bool = False,
         verbose: bool = False,
     ):
-        super().__init__(dump_file_name, callback, unwrap, verbose)
+        super().__init__(filename, callback, unwrap, verbose)
 
     def __iter__(self):
         return self
@@ -152,24 +152,27 @@ class Dump(DumpFileParser):
         snap: dict = {}
         item = self.file.readline()  # +1
 
-        if item is None:
+        if not item:
             return None
 
         # Invoke on_snapshot_parse_begin callback
-        self.callback.on_snapshot_parse_begin()
+        if self.callback:
+            self.callback.on_snapshot_parse_begin()
 
         timestamp = int(self.file.readline().split()[0])  # +1
         snap["timestamp"] = timestamp
 
         # Invoke on_snapshot_parse_timestamp callback
-        self.callback.on_snapshot_parse_timestamp(timestamp=timestamp)
+        if self.callback:
+            self.callback.on_snapshot_parse_timestamp(timestamp=timestamp)
 
         item = self.file.readline()
         natoms = int(self.file.readline())  # +1
         snap["natoms"] = natoms
 
         # Invoke on_snapshot_parse_natoms callback
-        self.callback.on_snapshot_parse_natoms(natoms=natoms)
+        if self.callback:
+            self.callback.on_snapshot_parse_natoms(natoms=natoms)
 
         item = self.file.readline()  # +1
         words = item.split("BOUNDS ")
@@ -225,7 +228,8 @@ class Dump(DumpFileParser):
         snap["box"] = SimulationBox(**box_dimensions)
 
         # Invoke on_snapshot_parse_box callback
-        self.callback.on_snapshot_parse_box(box=snap["box"])
+        if self.callback:
+            self.callback.on_snapshot_parse_box(box=snap["box"])
 
         atoms: List[Atom] = []
         if natoms:
@@ -242,13 +246,15 @@ class Dump(DumpFileParser):
 
             snap["atoms"] = atoms
             # Invoke on_snapshot_parse_atoms callback
-            self.callback.on_snapshot_parse_atoms(atoms)
+            if self.callback:
+                self.callback.on_snapshot_parse_atoms(atoms)
 
         # Create the snapshot
         snapshot = parse_obj_as(DumpSnapshot, snap)
 
         # Invoke on_snapshot_parse_end callback
-        self.callback.on_snapshot_parse_end(snapshot=snapshot)
+        if self.callback:
+            self.callback.on_snapshot_parse_end(snapshot=snapshot)
 
         return snapshot
 
