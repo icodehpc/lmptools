@@ -5,6 +5,7 @@
 ### Fixed
 
 - fixed double quotes in step if condition in `tests.yml`
+- fix step condition to only run for container `python:3.9-buster`
 
 ## [0.15.5] - 2022-09-05
 ### Added
