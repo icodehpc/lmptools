@@ -164,23 +164,9 @@ def test_dump_callback_on_snapshot_begin_parse(dump_file):
     Test whether the on snapshot parse begin callback has been invoked
     """
     cb = OnSnapshotParseBegin()
-    d = Dump(dump_file["filename"], callbacks=cb)
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
     assert cb.num_snapshots == len(dump_file["snapshots"])
-
-
-def test_dump_callback_on_snapshot_begin_parse_callback_converted_to_list(dump_file):
-    cb = OnSnapshotParseBegin()
-    d = Dump(dump_file["filename"], callbacks=[cb])
-    d.parse()
-    assert cb.num_snapshots == len(dump_file["snapshots"])
-
-
-def test_dump_callbacks_on_snapshot_begin_parse(dump_file):
-    cb = [OnSnapshotParseBegin() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-    assert all([c.num_snapshots == len(dump_file["snapshots"]) for c in cb])
 
 
 def test_dump_callback_on_snapshot_parse_timestamp(dump_file):
@@ -188,23 +174,11 @@ def test_dump_callback_on_snapshot_parse_timestamp(dump_file):
     Test whether on_snapshot_parse_atoms callback has been invoked
     """
     cb = OnSnapshotParseTimestamp()
-    d = Dump(dump_file["filename"], callbacks=[cb])
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file["snapshots"]):
         assert cb.timestamps[index] == snapshot.timestamp
-
-
-def test_dump_callbacks_on_snapshot_parse_timestamp(dump_file):
-    """
-    Test whether on_snapshot_parse_atoms callbacks has been invoked when a list of callbacks are provided
-    """
-    cb = [OnSnapshotParseTimestamp() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-    for c in cb:
-        for index, snapshot in enumerate(dump_file["snapshots"]):
-            assert c.timestamps[index] == snapshot.timestamp
 
 
 def test_dump_callback_on_snapshot_parse_natoms(dump_file):
@@ -212,24 +186,11 @@ def test_dump_callback_on_snapshot_parse_natoms(dump_file):
     Test whether on_snapshot_parse_atoms callback has been invoked
     """
     cb = OnSnapshotParseNatoms()
-    d = Dump(dump_file["filename"], callbacks=[cb])
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file["snapshots"]):
         assert cb.natoms[index] == snapshot.natoms
-
-
-def test_dump_callbacks_on_snapshot_parse_natoms(dump_file):
-    """
-    Test whether on_snapshot_parse_atoms callbacks has been invoked when a list of callbacks are given
-    """
-    cb = [OnSnapshotParseNatoms() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-
-    for c in cb:
-        for index, snapshot in enumerate(dump_file["snapshots"]):
-            assert c.natoms[index] == snapshot.natoms
 
 
 def test_dump_callback_on_snapshot_parse_box(dump_file):
@@ -237,23 +198,11 @@ def test_dump_callback_on_snapshot_parse_box(dump_file):
     Assert that on_snapshot_parse_box callback is called
     """
     cb = OnSnapshotParseBox()
-    d = Dump(dump_file["filename"], callbacks=[cb])
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file["snapshots"]):
         assert cb.simulation_box[index] == snapshot.box
-
-
-def test_dump_callbacks_on_snapshot_parse_box(dump_file):
-    """
-    Assert that on_snapshot_parse_box callback is called when list of callbacks is passed
-    """
-    cb = [OnSnapshotParseBox() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-    for c in cb:
-        for index, snapshot in enumerate(dump_file["snapshots"]):
-            assert c.simulation_box[index] == snapshot.box
 
 
 def test_dump_callback_on_snapshot_parse_atoms(dump_file):
@@ -261,24 +210,11 @@ def test_dump_callback_on_snapshot_parse_atoms(dump_file):
     assert on_snapshot_parse_atoms is called
     """
     cb = OnSnapshotParseAtoms()
-    d = Dump(dump_file["filename"], callbacks=[cb])
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file["snapshots"]):
         assert cb.atoms[index] == snapshot.atoms
-
-
-def test_dump_callbacks_on_snapshot_parse_atoms(dump_file):
-    """
-    assert on_snapshot_parse_atoms is called for a list of callbacks
-    """
-    cb = [OnSnapshotParseAtoms() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-
-    for c in cb:
-        for index, snapshot in enumerate(dump_file["snapshots"]):
-            assert c.atoms[index] == snapshot.atoms
 
 
 def test_dump_callback_on_snapshot_parse_end(dump_file):
@@ -286,21 +222,8 @@ def test_dump_callback_on_snapshot_parse_end(dump_file):
     Assert on_snapshot_parse_end is called
     """
     cb = OnSnapshotParseEnd()
-    d = Dump(dump_file["filename"], callbacks=cb)
+    d = Dump(dump_file["filename"], callback=cb)
     d.parse()
 
     for index, snapshot in enumerate(dump_file["snapshots"]):
         assert cb.snapshots[index] == snapshot
-
-
-def test_dump_callbacks_on_snapshot_parse_end(dump_file):
-    """
-    Assert on_snapshot_parse_end is called when list of callbacks is passed
-    """
-    cb = [OnSnapshotParseEnd() for i in range(5)]
-    d = Dump(dump_file["filename"], callbacks=cb)
-    d.parse()
-
-    for c in cb:
-        for index, snapshot in enumerate(dump_file["snapshots"]):
-            assert c.snapshots[index] == snapshot

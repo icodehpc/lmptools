@@ -163,8 +163,8 @@ def test_create_simulation_timestep_box_molecule_and_atom(sql_session):
 # Test snapshot persistence
 def test_dump_snapshot_sqlitedb_creation(dump_file):
     _ = Dump(
-        dump_file_name=dump_file["filename"],
-        callbacks=SQLWriter(simulation_id=1, db_name="test.db"),
+        filename=dump_file["filename"],
+        callback=SQLWriter(simulation_id=1, db_name="test.db"),
     )
     assert os.path.exists("test.db")
     os.remove("test.db")
@@ -172,7 +172,7 @@ def test_dump_snapshot_sqlitedb_creation(dump_file):
 
 def test_dump_snapshot_persist_simulation_model(dump_file):
     cb = SQLWriter(simulation_id=1, db_name="test.db")
-    d = Dump(dump_file_name=dump_file["filename"], callbacks=cb)
+    d = Dump(filename=dump_file["filename"], callback=cb)
     d.parse()
 
     # Assert
@@ -184,7 +184,7 @@ def test_dump_snapshot_persist_simulation_model(dump_file):
 
 def test_dump_snapshot_persist_simulation_timestep(dump_file):
     cb = SQLWriter(simulation_id=1, db_name="test.db", debug=False)
-    d = Dump(dump_file_name=dump_file["filename"], callbacks=cb)
+    d = Dump(filename=dump_file["filename"], callback=cb)
     d.parse()
 
     # Assert
