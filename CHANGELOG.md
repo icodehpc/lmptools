@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added abstract class for defining a `DumpFileParser`
+
 ### Changed
 
 - Remove `push to main`
