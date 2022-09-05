@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import List, Optional
 import os
+from abc import ABC, abstractmethod
+from typing import List, Optional
+
 from loguru import logger
 from pydantic import parse_obj_as
-from abc import ABC, abstractmethod
 
 from ..core.atom import Atom
 from ..core.exceptions import SkipSnapshot
@@ -20,6 +21,7 @@ class DumpFileParser(ABC):
     :param filename: Path to the dump file to be parsed
     :param callback: [Optional] Callback to be used during parsing
     """
+
     def __init__(self, filename: str, callback: DumpCallback = None, unwrap: bool = False, verbose: bool = False):
         self.filename = filename
         if not os.path.exists(filename):
@@ -148,7 +150,7 @@ class Dump(DumpFileParser):
         Read the dump file and return a single snapshot
         """
         snap: dict = {}
-        item = self.file.readline() # +1
+        item = self.file.readline()  # +1
 
         if item is None:
             return None
