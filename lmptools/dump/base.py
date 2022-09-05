@@ -4,10 +4,33 @@ from typing import List, Optional
 
 from loguru import logger
 from pydantic import parse_obj_as
+from abc import ABC
 
 from ..core.atom import Atom
 from ..core.exceptions import SkipSnapshot
 from ..core.simulation import DumpSnapshot, SimulationBox
+
+
+class DumpFileParser(ABC):
+    """
+    Base class defining the template for a LAMMPS dump file parser
+    """
+    def __init__(self, filename: str):
+        self._filename = filename
+
+    @abstractmethod
+    def parse(self)
+
+    @abstractmethod
+    def __iter__(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __next__(self) -> DumpSnapshot:
+        """
+        Yield the next snapshot from file
+        """
+        raise NotImplementedError
 
 
 class DumpCallback(object):
