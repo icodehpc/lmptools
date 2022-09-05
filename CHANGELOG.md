@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- fixed double quotes in step if condition in `tests.yml`
+
 ## [0.15.5] - 2022-09-05
 ### Added
 - Adding `echo` statements for debugging
