@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the `get-latest-tag` action to simply using `git describe` CLI command
+
 ## [0.15.6] - 2022-09-05
 ### Fixed
 - fixed double quotes in step if condition in `tests.yml`
