@@ -20,6 +20,3 @@ class Pipeline:
     def run(self, snapshot: DumpSnapshot, *args, **kwargs):
         for idx, task in enumerate(self.tasks):
             snapshot = task.run(snapshot)
-
-
-
