@@ -7,11 +7,11 @@ from ..dump import DumpSnapshot
 
 
 class Task(ABC):
-    """ Base Task class """
+    """Base Task class"""
 
     @abstractmethod
     def run(self, snapshot: DumpSnapshot, *args, **kwargs) -> Optional[DumpSnapshot]:
-        """ Run method to implement the task """
+        """Run method to implement the task"""
         raise NotImplementedError
 
 
