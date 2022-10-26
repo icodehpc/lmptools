@@ -11,3 +11,7 @@ dist
 debug.py
 *.db
 *.swp
+
+
+# custom
+scratch
