@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-### Operations
+### Fixed
 
 - Updated `if` condition in `release` block in `tests.yml` workflow
 
