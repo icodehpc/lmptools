@@ -16,9 +16,13 @@ class Task(ABC):
 
 
 class Pipeline:
-    def __init__(self, tasks: List[Task]):
+    def __init__(self, tasks: List[Task] = []):
         self._tasks = tasks
 
     def run(self, snapshot: Optional[DumpSnapshot], *args, **kwargs):
         for idx, task in enumerate(self._tasks):
             snapshot = task.run(snapshot)
+
+    def append(self, task: Task):
+        """ Add tasks to the pipeline """
+        self._tasks.append(task)
