@@ -2,8 +2,8 @@
 
 ## [Unreleased]
 
+## [0.16.6] - 2022-10-27
 ### Added
-
 - Created base `Task` and `Pipeline` classes
 - Added `append` method in `Pipeline` class to allow adding tasks as a list
 
@@ -101,7 +101,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/acd55682043e8ef5513712dbd7bb4e08f4162634...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/e93f918164d616ad0112679194d6cee6bc886b08...develop
+[0.16.6]: https://github.com/venkatBala/lmptools/changelog/compare/acd55682043e8ef5513712dbd7bb4e08f4162634...develop
 [0.15.6]: https://github.com/venkatBala/lmptools/changelog/compare/85b0a03cc4c6c0bc4ccc978179ccc3bd0ba20ee4...develop
 [0.15.5]: https://github.com/venkatBala/lmptools/changelog/compare/72428fad4c742a332e404abc8b65210137027760...develop
 [0.14.5]: https://github.com/venkatBala/lmptools/changelog/compare/5bd6ed39675d545bb9665f29c2cf9622e1077d49...develop
