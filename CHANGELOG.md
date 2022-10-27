@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Operations
+
+- Updated `if` condition in `release` block in `tests.yml` workflow
+
 ## [0.16.6] - 2022-10-27
 ### Added
 - Created base `Task` and `Pipeline` classes
