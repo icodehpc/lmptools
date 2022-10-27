@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Created base `Task` and `Pipeline` classes
+- Added `append` method in `Pipeline` class to allow adding tasks as a list
+
 ## [0.15.6] - 2022-09-05
 ### Fixed
 - fixed double quotes in step if condition in `tests.yml`
