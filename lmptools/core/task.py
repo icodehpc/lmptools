@@ -19,6 +19,6 @@ class Pipeline:
     def __init__(self, tasks: List[Task]):
         self._tasks = tasks
 
-    def run(self, snapshot: DumpSnapshot, *args, **kwargs):
-        for idx, task in enumerate(self.tasks):
+    def run(self, snapshot: Optional[DumpSnapshot], *args, **kwargs):
+        for idx, task in enumerate(self._tasks):
             snapshot = task.run(snapshot)
