@@ -24,5 +24,5 @@ class Pipeline:
             snapshot = task.run(snapshot)
 
     def append(self, task: Task):
-        """ Add tasks to the pipeline """
+        """Add tasks to the pipeline"""
         self._tasks.append(task)
