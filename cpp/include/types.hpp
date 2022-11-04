@@ -40,12 +40,6 @@ class Vec3 {
      const std::array<T, 3> _data;
 };
 
-template <>
-double Vec3<double>::norm() const {
-    return std::sqrt(std::inner_product(_data.begin(), _data.end(), _data.begin(), 0.0));
-}
-
-template
 
 enum class type_id : uint32_t {
   NONE,
