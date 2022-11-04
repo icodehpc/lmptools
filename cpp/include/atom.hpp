@@ -13,27 +13,33 @@ class Atom {
      const int id, mol, type;
      const std::string element;
 
-     double mass, charge;
+     const double mass, charge;
+
+     // Spherical particles
+     const double radius, diameter;
+
+     // Angular velocity/momentum
+     const Vec3<double> omega, angmom;
 
      // Unscaled atom coordinates
-     vec3<double> x;
+     const Vec3<double> x;
 
-     // scaled atom coordinates
-     vec3<double> xs;
+     // Scaled atom coordinates
+     const Vec3<double> xs;
 
-     // unwrapped atom coordinates
-     vec3<double> xu;
+     // Unwrapped atom coordinates
+     const Vec3<double> xu;
 
-     // image id
-     vec3<uint32_t> imageId;
+     // Image ids
+     const Vec3<uint32_t> imageId;
 
      // Atom velocities
-     vec3<double> v;
+     const Vec3<double> v;
 
      // Atom forces
-     vec3<double> f;
+     const Vec3<double> f;
 
      // Dipole
-     vec3<double> mu;
+     const Vec3<double> mu;
 
 };
