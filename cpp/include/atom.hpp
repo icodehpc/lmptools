@@ -6,7 +6,7 @@
 
 /*
  * Base atom class based on the LAMMPS atom style
- * 
+ *
  * */
 class Atom {
  public:
@@ -17,7 +17,7 @@ class Atom {
 
      // Unscaled atom coordinates
      vec3<double> x;
-     
+
      // scaled atom coordinates
      vec3<double> xs;
 
