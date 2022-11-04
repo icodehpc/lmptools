@@ -55,4 +55,3 @@ enum class type_id : uint32_t {
   FLOAT64,
   STRING
 };
-
