@@ -18,6 +18,7 @@ enum class index: uint32_t {
 template <typename T>
 class Vec3 {
  public:
+     explicit Vec3(T x): Vec3(x, x, x) {}
      Vec3(T x, T y, T z): _data(x, y, z) {}
      Vec3(const Vec3<T>& v): _data(v._data) {}
 
