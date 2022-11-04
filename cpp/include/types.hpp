@@ -18,11 +18,10 @@ enum class index: uint32_t {
 template <typename T>
 class Vec3 {
  public:
-     Vec3() = default;
      Vec3(T x, T y, T z): _data(x, y, z) {}
      Vec3(const Vec3<T>& v): _data(v._data) {}
 
-     T& operator[](uint8_t index) {
+     T& operator[](uint8_t index) const {
          return _data[index];
      }
 
