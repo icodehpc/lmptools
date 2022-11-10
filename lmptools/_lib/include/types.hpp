@@ -27,10 +27,10 @@ class Vec3 {
      }
 
      T norm() const {
-         if constexpr(std::is_floating_point<T>) {
+         if constexpr(std::is_floating_point<T>::value) {
              // L2 norm
              return std::sqrt(std::inner_product(_data.begin(), _data.end(), _data.begin(), 0.0));
-         } else if constexpr(std::is_integral<T>) {
+         } else if constexpr(std::is_integral<T>::value) {
              // L1 norm
              return std::abs(_data[0]) + std::abs(_data[1]) + std::abs(_data[2]);
          }

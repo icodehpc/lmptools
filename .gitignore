@@ -11,6 +11,8 @@ dist
 debug.py
 *.db
 *.swp
+.cache
+.vim
 
 
 # custom

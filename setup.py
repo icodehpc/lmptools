@@ -1,4 +1,42 @@
-from setuptools import find_packages, setup
+import os
+from setuptools import find_packages, setup, Extension
+from setuptools.command.build_ext import build_ext
+import subprocess
+import sys
+
+
+class CMakeExtension(Extension):
+    def __init__(self, name, cmakelists_dir=".", **kwargs):
+        super().__init__(name, sources=[], **kwargs)
+        self.cmakelists_dir = os.path.abspath(cmakelists_dir)
+
+class CmakeBuild(build_ext):
+    def build_extensions(self) -> None:
+        try:
+            subprocess.check_output(['cmake', '--version'])
+        except OSError:
+            raise RuntimeError('Cmake not found!')
+
+        for ext in self.extensions:
+            os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+            build_type = 'Debug' if os.environ.get('DEBUG', 'OFF') == 'ON' else 'Release'
+
+            cmake_args = [
+                    '-DCMAKE_BUILD_TYPE = %s'%build_type,
+                    '-DCMAKE_EXPORT_COMPILE_COMMANDS=1',
+                    '-DPYTHON_EXECUTABLE={}'.format(sys.executable)
+                    ]
+
+            if not os.path.exists(self.build_temp):
+                os.makedirs(self.build_temp)
+
+            # Config
+            subprocess.check_call(['cmake', ext.cmakelists_dir] + cmake_args, cwd=self.build_temp)
+
+            # Build
+            subprocess.check_call(['cmake', '--build', '.', '--config', build_type], cwd=self.build_temp)
+
+
 
 with open("VERSION", "r") as f:
     version = f.read().strip()
@@ -38,6 +76,8 @@ setup_info = {
         "Topic :: Scientific/Engineering",
         "Topic :: System :: Distributed Computing",
     ],
+    "ext_modules":[CMakeExtension(name='lmptools_')],
+    "cmdclass":{'build_ext': CmakeBuild}
 }
 
 if __name__ == "__main__":
