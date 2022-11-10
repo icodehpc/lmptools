@@ -19,4 +19,3 @@ set_target_properties(
 	PREFIX ""
 	OUTPUT_NAME "lmptools"
 	LINKER_LANGUAGE CXX)
-
