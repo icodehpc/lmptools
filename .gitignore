@@ -15,3 +15,11 @@ debug.py
 
 # custom
 scratch
+build
+compile_commands.json
+
+# shared objects
+*.so
+
+# Vim swap files
+*.swp
