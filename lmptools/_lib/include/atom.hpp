@@ -4,10 +4,6 @@
 #include <string>
 #include "types.hpp"
 
-#ifdef __cplusplus
-#include "Python.h"
-#endif
-
 namespace lmptools {
 
 /*
