@@ -6,6 +6,10 @@
 
 - Updated `if` condition in `release` block in `tests.yml` workflow
 
+### Added
+- `C++` base type for `Atom` and `SimulationBox`
+- Added `Vec3` template type for easy manipulation of 3-D vectors
+
 ## [0.16.6] - 2022-10-27
 ### Added
 - Created base `Task` and `Pipeline` classes
