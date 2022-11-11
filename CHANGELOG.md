@@ -2,13 +2,13 @@
 
 ## [Unreleased]
 
-### Fixed
-
-- Updated `if` condition in `release` block in `tests.yml` workflow
-
+## [0.17.7] - 2022-11-11
 ### Added
 - `C++` base type for `Atom` and `SimulationBox`
 - Added `Vec3` template type for easy manipulation of 3-D vectors
+
+### Fixed
+- Updated `if` condition in `release` block in `tests.yml` workflow
 
 ## [0.16.6] - 2022-10-27
 ### Added
@@ -109,7 +109,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/e93f918164d616ad0112679194d6cee6bc886b08...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/743d01b0409f6a602f7eaaf4c62e99c56c29b483...develop
+[0.17.7]: https://github.com/venkatBala/lmptools/changelog/compare/e93f918164d616ad0112679194d6cee6bc886b08...develop
 [0.16.6]: https://github.com/venkatBala/lmptools/changelog/compare/acd55682043e8ef5513712dbd7bb4e08f4162634...develop
 [0.15.6]: https://github.com/venkatBala/lmptools/changelog/compare/85b0a03cc4c6c0bc4ccc978179ccc3bd0ba20ee4...develop
 [0.15.5]: https://github.com/venkatBala/lmptools/changelog/compare/72428fad4c742a332e404abc8b65210137027760...develop
