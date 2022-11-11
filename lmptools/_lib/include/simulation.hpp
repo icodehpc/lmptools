@@ -8,15 +8,11 @@ class SimulationBox {
 	 double xlo, xhi;
 	 double ylo, yhi;
 	 double zlo, zhi;
-	 double xy, xz, yz = 0.0;
-	 bool triclinic = false;
 
 	 SimulationBox() = delete;
 	 SimulationBox(double xlo, double xhi,
 			 double ylo, double yhi,
-			 double zlo, double zhi,
-			 double xy, double xz, double yz,
-			 bool triclinic);
+			 double zlo, double zhi);
 
 	 ~SimulationBox() = default;
 
@@ -25,10 +21,27 @@ class SimulationBox {
 	 double lz() const { return zhi - zlo; }
 
 	 // Comparison operator
-	 bool operator==(const SimulationBox& other);
+	 auto operator==(const SimulationBox& other);
 
 	 // ostream operator
 	 friend std::ostream& operator<<(std::ostream& out, const SimulationBox& box);
 
+};
+
+// Triclinic box
+class TriclinicBox: public SimulationBox {
+ public:
+	 double xz, xy, yz;
+	 TriclinicBox(double xlo, double xhi, double ylo, double yhi,
+			 					double zlo, double zhi, double xy, double xz, double yz);
+
+	 TriclinicBox() = delete;
+	 ~TriclinicBox();
+
+	 // Comparison operator
+	 auto operator==(const TriclinicBox& other);
+
+	 // ostream operator
+	 friend std::ostream& operator<<(std::ostream& out, const TriclinicBox& box);
 };
 }

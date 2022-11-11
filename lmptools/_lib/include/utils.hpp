@@ -6,6 +6,21 @@
 #include <cmath>
 #include <concepts>
 
+namespace lmptools {
+
+template <typename T>
+concept IsEqualityComparable = std::equality_comparable<T>;
+
+// Check equality between an even number of arbitrary arguments of the same type
+template <IsEqualityComparable T>
+auto is_equal(T a, T b) { return a == b; }
+
+template <IsEqualityComparable T, IsEqualityComparable... Args>
+auto is_equal(T a, T b, Args... args) {
+	return is_equal(a, b) && is_equal(args...);
+}
+
+
 // To index into 3D arrays in a readable manner
 enum class index: uint32_t {
     X,
@@ -49,3 +64,5 @@ enum class type_id : uint32_t {
   FLOAT64,
   STRING
 };
+
+}
