@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Reverted adding prefix `pre` as the release is being tagged automatically as a pre-release
+
 ## [0.18.8] - 2022-12-08
 ### Fixed
 - Update `refs` to `develop`
