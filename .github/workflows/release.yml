@@ -32,7 +32,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ env.VERSION }}
           release_branches: develop
-          tag_prefix: "pre"
 
       - name: Create GitHub pre-release
         uses: ncipollo/release-action@v1
