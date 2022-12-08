@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Update `refs` to `develop`
+- added `develop` to the release branch when creating a release tag
+
 ## [0.18.7] - 2022-12-08
 ### Added
 - Adding `DumpSnapshot` class skeleton
