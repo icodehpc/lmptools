@@ -20,3 +20,18 @@ file(GLOB SRCS cpp/src/*.cpp)
 add_library(lmptools SHARED  ${SRCS})
 set_target_properties(lmptools PROPERTIES VERSION ${LMPTOOLS_VERSION})
 set_target_properties(lmptools PROPERTIES SOVERSION 1)
+
+
+# Enable testing
+enable_testing()
+
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# Glob all tests
+file(GLOB ALLTESTS tests/cpp/*.cpp)
+
+add_executable(lmptoolstests ${ALLTESTS})
+target_link_libraries(lmptoolstests GTest::gtest GTest::gtest_main)
+add_test(LMPTOOLSTestSuite lmptoolstests)
+
