@@ -17,7 +17,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          ref: release
+          ref: develop
 
       - name: Parse version
         run: |
@@ -32,6 +32,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ env.VERSION }}
           release_branches: develop
+          tag_prefix: "pre"
 
       - name: Create GitHub pre-release
         uses: ncipollo/release-action@v1
