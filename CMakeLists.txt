@@ -1,24 +1,22 @@
 cmake_minimum_required(VERSION 3.17)
 project(lmptools)
 
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_STANDARD 20)
+file(READ "VERSION" LMPTOOLS_VERSION)
+string(STRIP "${LMPTOOLS_VERSION}" LMPTOOLS_VERSION)
+message("Version will be ${LMPTOOLS_VERSION}")
 
-find_package(Python COMPONENTS Development Interpreter)
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "-Werror -pedantic -Wall")
 
 include_directories(cpp/include)
+file(GLOB SRCS cpp/src/*.cpp)
 
-#include_directories(lmptools/_lib/include)
-include_directories(${Python_INCLUDE_DIRS})
 
-FILE(GLOB SRCS cpp/src/*.cpp)
-set(CMAKE_CXX_CLANG_TIDY clang-tidy; -header-filter=.; -checks=*,-llvmlibc-restrict-system-libc-headers,-fuchsia-overloaded-operator; --warnings-as-errors=*;)
+#set(CMAKE_CXX_CLANG_TIDY clang-tidy; -header-filter=.;
+#	-checks=*,-llvmlibc-restrict-system-libc-headers,-fuchsia-overloaded-operator;
+#	--warnings-as-errors=*;)
 
 add_library(lmptools SHARED  ${SRCS})
-
-set_target_properties(
-	lmptools
-	PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME "lmptools"
-	LINKER_LANGUAGE CXX)
+set_target_properties(lmptools PROPERTIES VERSION ${LMPTOOLS_VERSION})
+set_target_properties(lmptools PROPERTIES SOVERSION 1)

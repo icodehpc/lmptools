@@ -31,7 +31,7 @@ class SimulationBox {
 // Triclinic box
 class TriclinicBox : public SimulationBox {
  public:
-  double xz, xy, yz;
+  double xy, xz, yz;
   TriclinicBox(double xlo, double xhi, double ylo, double yhi, double zlo,
                double zhi, double xy, double xz, double yz);
 

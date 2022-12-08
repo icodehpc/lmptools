@@ -1,5 +1,3 @@
-#pragma once
-
 #include "simulation.h"
 
 #include "utils.h"
