@@ -1,30 +1,39 @@
-#pragma once
-
-#include <stdint.h>
+#ifndef UTILS_H_
+#define UTILS_H_
 
 #include <array>
 #include <cmath>
 #include <concepts>
+#include <cstdint>
 #include <numeric>
+#include <string>
 
 namespace lmptools {
+
+using Int8 = uint8_t;
+using Int32 = uint32_t;
+using Int64 = uint64_t;
+using Float32 = float;
+using Float64 = double;
+using Str = std::string;
 
 template <typename T>
 concept IsEqualityComparable = std::equality_comparable<T>;
 
-// Check equality between an even number of arbitrary arguments of the same type
+// Check equality between an even number of arbitrary arguments of the same
+// type
 template <IsEqualityComparable T>
-auto is_equal(T a, T b) {
-  return a == b;
+auto is_equal(T first, T second) {
+  return first == second;
 }
 
 template <IsEqualityComparable T, IsEqualityComparable... Args>
-auto is_equal(T a, T b, Args... args) {
-  return is_equal(a, b) && is_equal(args...);
+auto is_equal(T first, T second, Args... args) {
+  return is_equal(first, second) && is_equal(args...);
 }
 
 // To index into 3D arrays in a readable manner
-enum class index : uint32_t {
+enum class index : Int32 {
   X,
   Y,
   Z,
@@ -36,15 +45,15 @@ class Vec3 {
  public:
   explicit Vec3(T x) : Vec3(x, x, x) {}
   Vec3(T x, T y, T z) : _data(x, y, z) {}
-  Vec3(const Vec3<T>& v) : _data(v._data) {}
+  Vec3(const Vec3<T> &v) : _data(v._data) {}
 
-  T& operator[](uint8_t index) const { return _data[index]; }
+  T &operator[](Int8 index) const { return _data[index]; }
 
   T norm() const {
     if constexpr (std::is_floating_point<T>::value) {
       // L2 norm
       return std::sqrt(
-	  std::inner_product(_data.begin(), _data.end(), _data.begin(), 0.0));
+          std::inner_product(_data.begin(), _data.end(), _data.begin(), 0.0));
     } else if constexpr (std::is_integral<T>::value) {
       // L1 norm
       return std::abs(_data[0]) + std::abs(_data[1]) + std::abs(_data[2]);
@@ -55,13 +64,5 @@ class Vec3 {
   const std::array<T, 3> _data;
 };
 
-enum class type_id : uint32_t {
-  NONE,
-  UINT32,
-  UINT64,
-  FLOAT32,
-  FLOAT64,
-  STRING
-};
-
 }  // namespace lmptools
+#endif

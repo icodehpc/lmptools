@@ -12,17 +12,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ["ubuntu-20.04"]
-        container:
-          - python:3.8-buster
-          - python:3.8-bullseye
-          - python:3.9-buster
-          - python:3.9-bullseye
-    container: ${{ matrix.container }}
+    runs-on: "ubuntu-latest"
     continue-on-error: false
     outputs:
       release: ${{ steps.push.outputs.release }}
@@ -33,60 +23,28 @@ jobs:
           persist-credentials: false
           token: ${{ secrets.ADMIN_TOKEN }}
 
-      - name: Install package dependencies
+      - name: Install GCC toolchain
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 11
+          platform: x64
+
+      - name: Install Google Tests
         run: |
-          pip install --no-cache-dir -r ./requirements.txt
-          pip install --no-cache-dir -r ./tests/requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y libgtest-dev
 
-      - name: Build package distribution
-        run: python setup.py sdist
-
-      - name: Validate distribution
+      - name: Configure CMake
         run: |
-          VERSION="$(cat ./VERSION)"
-          cd dist
-          tar xzf lmptools-${VERSION}.tar.gz
-          diff -r lmptools-${VERSION}/lmptools/core ../lmptools/core
-          diff -r lmptools-${VERSION}/lmptools/dump ../lmptools/dump
-          diff -r lmptools-${VERSION}/lmptools/writers ../lmptools/writers
-          rm -rf lmptools-${VERSION}/
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
 
-      - name: Install lmptools
-        run: pip install -e .
+      - name: Build
+        run: |
+          cmake --build ${{ github.workspace }}/build --config Debug
 
       - name: Run tests and measure coverage
         run: |
-          PYTHONPATH=${PWD}/ pytest -vv --cov-report xml:coverage.xml --cov-report term-missing --cov '.' tests
-
-      - name: Upload report to Codecov
-        if: github.ref == 'refs/head/develop' && matrix.container == 'python:3.9-buster'
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage.xml
-
-      - name: Get latest release tag
-        id: get-latest-tag
-        if: github.ref == 'refs/head/develop' && matrix.os == 'ubuntu-20.04' && matrix.container == 'python:3.9-buster'
-        run: |
-          tag=$(git describe --abbrev=0)
-          echo "::set-output name=tag::$tag"
-
-      - name: Check if a release can be made or not
-        id: push
-        if: github.ref == 'refs/heads/develop' && matrix.os == 'ubuntu-20.04' && matrix.container == 'python:3.9-buster'
-        run: |
-          MASTER_VERSION="$(echo '${{ steps.get-latest-tag.outputs.tag }}' | cut -c2- )"
-          VERSION=$(cat ./VERSION)"
-          echo "MASTER_VERSION = ${MASTER_VERSION}"
-          echo "VERSION = ${VERSION}"
-          release=false
-          if [ "$MASTER_VERSION" = "$VERSION" ]; then
-            echo "$VERSION has been previously released"
-          else
-            release=true
-          fi
-          echo "RELEASE=$release" >> $GITHUB_ENV
-          echo "::set-output name=release::$release"
+          ctest --test-dir ${{ github.workspace }}/build -v --output-on-failure
 
   release:
     needs: tests

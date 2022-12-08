@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- Adding `DumpSnapshot` class skeleton
+
+### Changed
+
+- Update `tests.yml` to configure & build using CMake
+- Use GoogleTest to run C++ tests
+- Update CMakeLists.txt to build shared library with version information parsed from file
+
 ## [0.17.7] - 2022-11-11
 ### Added
 - `C++` base type for `Atom` and `SimulationBox`
