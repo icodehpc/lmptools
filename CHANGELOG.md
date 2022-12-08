@@ -2,12 +2,11 @@
 
 ## [Unreleased]
 
+## [0.18.7] - 2022-12-08
 ### Added
-
 - Adding `DumpSnapshot` class skeleton
 
 ### Changed
-
 - Update `tests.yml` to configure & build using CMake
 - Use GoogleTest to run C++ tests
 - Update CMakeLists.txt to build shared library with version information parsed from file
@@ -119,7 +118,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/743d01b0409f6a602f7eaaf4c62e99c56c29b483...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/eda1c5029e831ddb9ad56e3a469ce2555f346fdd...develop
+[0.18.7]: https://github.com/venkatBala/lmptools/changelog/compare/743d01b0409f6a602f7eaaf4c62e99c56c29b483...develop
 [0.17.7]: https://github.com/venkatBala/lmptools/changelog/compare/e93f918164d616ad0112679194d6cee6bc886b08...develop
 [0.16.6]: https://github.com/venkatBala/lmptools/changelog/compare/acd55682043e8ef5513712dbd7bb4e08f4162634...develop
 [0.15.6]: https://github.com/venkatBala/lmptools/changelog/compare/85b0a03cc4c6c0bc4ccc978179ccc3bd0ba20ee4...develop
