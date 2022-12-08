@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- Added `clang-format` check workflow
+
 ## [0.19.8] - 2022-12-08
 ### Changed
 - Reverted adding prefix `pre` as the release is being tagged automatically as a pre-release
