@@ -13,6 +13,7 @@ debug.py
 *.swp
 .cache
 .vim
+*.ipynb
 
 
 # custom
@@ -25,3 +26,9 @@ compile_commands.json
 
 # Vim swap files
 *.swp
+
+# Ctags
+tags
+
+# CMake
+Testing
