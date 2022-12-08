@@ -7,7 +7,7 @@ message("Version will be ${LMPTOOLS_VERSION}")
 
 set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-Werror -pedantic -Wall")
+add_compile_options(-Werror -pedantic -Wall)
 
 include_directories(cpp/include)
 file(GLOB SRCS cpp/src/*.cpp)
@@ -24,7 +24,6 @@ set_target_properties(lmptools PROPERTIES SOVERSION 1)
 
 # Enable testing
 enable_testing()
-
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
