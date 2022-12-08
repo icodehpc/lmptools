@@ -2,8 +2,8 @@
 
 ## [Unreleased]
 
+## [0.18.8] - 2022-12-08
 ### Fixed
-
 - Update `refs` to `develop`
 - added `develop` to the release branch when creating a release tag
 
@@ -123,7 +123,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/eda1c5029e831ddb9ad56e3a469ce2555f346fdd...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/9566dd2f56a2b1b8601a6784fc01b76201eb95c4...develop
+[0.18.8]: https://github.com/venkatBala/lmptools/changelog/compare/eda1c5029e831ddb9ad56e3a469ce2555f346fdd...develop
 [0.18.7]: https://github.com/venkatBala/lmptools/changelog/compare/743d01b0409f6a602f7eaaf4c62e99c56c29b483...develop
 [0.17.7]: https://github.com/venkatBala/lmptools/changelog/compare/e93f918164d616ad0112679194d6cee6bc886b08...develop
 [0.16.6]: https://github.com/venkatBala/lmptools/changelog/compare/acd55682043e8ef5513712dbd7bb4e08f4162634...develop
