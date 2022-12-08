@@ -30,7 +30,7 @@ enum DumpStyle {
 template <typename T>
 class DumpSnapshot {
  public:
-  DumpSnapshot() = delete;
+  DumpSnapshot() = default;
   DumpSnapshot(uint8_t dumpStyle, uint64_t timestep);
   DumpSnapshot(uint8_t dumpStyle, uint64_t timestep, uint64_t natoms,
                const SimulationBox &box);
@@ -49,7 +49,7 @@ class DumpSnapshot {
   void append(const Atom &atom);
 
   // Subscript operator (read/write)
-  Atom &operator[](uint64_t index) const;
+  const Atom &operator[](uint64_t index) const;
   Atom &operator[](uint64_t index);
 
   // Return a range/view of selected atoms
