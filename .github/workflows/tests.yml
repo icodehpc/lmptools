@@ -44,7 +44,7 @@ jobs:
 
       - name: Run tests and measure coverage
         run: |
-          ctest -v
+          ctest --test-dir ${{ github.workspace }}/build -v --output-on-failure
 
   release:
     needs: tests
