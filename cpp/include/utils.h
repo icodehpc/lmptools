@@ -10,7 +10,6 @@
 
 namespace lmptools {
 
-using Int8 = uint8_t;
 using Int32 = uint32_t;
 using Int64 = uint64_t;
 using Float32 = float;
@@ -47,7 +46,7 @@ class Vec3 {
   Vec3(T x, T y, T z) : _data(x, y, z) {}
   Vec3(const Vec3<T> &v) : _data(v._data) {}
 
-  T &operator[](Int8 index) const { return _data[index]; }
+  T &operator[](Int32 index) const { return _data[index]; }
 
   T norm() const {
     if constexpr (std::is_floating_point<T>::value) {

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added new tests to validate `DumpSnapshot` constructors, getters and setters
+
+### Changed
+
+- Implemented `DumpSnapshot` constructors in header itself
+- Renamed unit test file
+- Updated `operator<<` for `SimulationBox` and `TriclinicBox` to be class methods
+
+
 ## [0.20.8] - 2022-12-08
 ### Added
 - Added `clang-format` check workflow
