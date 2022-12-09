@@ -14,10 +14,10 @@ auto SimulationBox::operator==(const SimulationBox &other) {
 }
 
 // Stdout simulation box
-std::ostream &operator<<(std::ostream &out, const SimulationBox &box) {
-  out << box.xlo << " " << box.xhi << "\n"
-      << box.ylo << " " << box.yhi << "\n"
-      << box.zlo << " " << box.zhi << "\n";
+std::ostream &SimulationBox::operator<<(std::ostream &out) {
+  out << xlo << " " << xhi << "\n"
+      << ylo << " " << yhi << "\n"
+      << zlo << " " << zhi << "\n";
   return out;
 }
 
@@ -34,10 +34,10 @@ auto TriclinicBox::operator==(const TriclinicBox &other) {
 }
 
 // Stdout Triclinic box
-std::ostream &operator<<(std::ostream &out, const TriclinicBox &box) {
-  out << box.xlo << " " << box.xhi << " " << box.xy << "\n"
-      << box.ylo << " " << box.yhi << " " << box.xz << "\n"
-      << box.zlo << " " << box.zhi << " " << box.yz << "\n";
+std::ostream &TriclinicBox::operator<<(std::ostream &out) {
+  out << xlo << " " << xhi << " " << xy << "\n"
+      << ylo << " " << yhi << " " << xz << "\n"
+      << zlo << " " << zhi << " " << yz << "\n";
   return out;
 }
 

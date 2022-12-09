@@ -10,7 +10,7 @@ class SimulationBox {
   double ylo, yhi;
   double zlo, zhi;
 
-  SimulationBox() = delete;
+  SimulationBox() = default;
   SimulationBox(double xlo, double xhi, double ylo, double yhi, double zlo,
                 double zhi);
 
@@ -21,29 +21,28 @@ class SimulationBox {
   [[nodiscard]] auto lz() const -> double { return zhi - zlo; }
 
   // Comparison operator
+  bool operator==(const SimulationBox &other) const = default;
   auto operator==(const SimulationBox &other);
 
   // ostream operator
-  friend auto operator<<(std::ostream &out, const SimulationBox &box)
-      -> std::ostream &;
+  std::ostream &operator<<(std::ostream &out);
 };
 
 // Triclinic box
 class TriclinicBox : public SimulationBox {
  public:
+  TriclinicBox() = default;
+  ~TriclinicBox();
   double xy, xz, yz;
   TriclinicBox(double xlo, double xhi, double ylo, double yhi, double zlo,
                double zhi, double xy, double xz, double yz);
 
-  TriclinicBox() = delete;
-  ~TriclinicBox();
-
   // Comparison operator
+  bool operator==(const TriclinicBox &other) const = default;
   auto operator==(const TriclinicBox &other);
 
   // ostream operator
-  friend auto operator<<(std::ostream &out, const TriclinicBox &box)
-      -> std::ostream &;
+  std::ostream &operator<<(std::ostream &out);
 };
 }  // namespace lmptools
 
