@@ -2,16 +2,14 @@
 
 ## [Unreleased]
 
+## [0.21.8] - 2022-12-09
 ### Added
-
 - Added new tests to validate `DumpSnapshot` constructors, getters and setters
 
 ### Changed
-
 - Implemented `DumpSnapshot` constructors in header itself
 - Renamed unit test file
 - Updated `operator<<` for `SimulationBox` and `TriclinicBox` to be class methods
-
 
 ## [0.20.8] - 2022-12-08
 ### Added
@@ -142,7 +140,8 @@
 - Removed `changelog_reminder` and `changelog_check` workflows
 - cleanup empty dir
 
-[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/5aa33f400b8654304ed41aa1e208974d0bb9fd3b...develop
+[Unreleased]: https://github.com/venkatBala/lmptools/changelog/compare/a22529f8c06972f81de1d7f19437615e6632cedb...develop
+[0.21.8]: https://github.com/venkatBala/lmptools/changelog/compare/5aa33f400b8654304ed41aa1e208974d0bb9fd3b...develop
 [0.20.8]: https://github.com/venkatBala/lmptools/changelog/compare/12bbc59693ec9c7fc0088ca1f93a6f500f39f4e2...develop
 [0.19.8]: https://github.com/venkatBala/lmptools/changelog/compare/9566dd2f56a2b1b8601a6784fc01b76201eb95c4...develop
 [0.18.8]: https://github.com/venkatBala/lmptools/changelog/compare/eda1c5029e831ddb9ad56e3a469ce2555f346fdd...develop
