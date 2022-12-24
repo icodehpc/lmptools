@@ -50,11 +50,27 @@ class Vec3 {
   const T& operator[](Int32 index) const { return data_[index]; }
   T& operator[](Int32 index) { return data_[index]; }
 
-  T norm() const;
+  T norm() const noexcept {
+    if constexpr (std::is_floating_point<T>::value) {
+      // L2 norm
+      return std::sqrt(
+          std::inner_product(data_.begin(), data_.end(), data_.begin(), 0.0));
+    } else if constexpr (std::is_integral<T>::value) {
+      // L1 norm
+      return std::abs(data_[0]) + std::abs(data_[1]) + std::abs(data_[2]);
+    }
+  }
 
-  Vec3& operator=(const Vec3& src);
+  Vec3& operator=(const Vec3& src) {
+    data_[0] = src[0];
+    data_[1] = src[1];
+    data_[2] = src[2];
+    return *this;
+  }
 
-  friend bool operator==(const Vec3& a, const Vec3& b) noexcept;
+  friend bool operator==(const Vec3<T>& a, const Vec3<T>& b) noexcept {
+    return is_equal(a[0], b[0], a[1], b[1], a[2], b[2]);
+  }
 
  private:
   std::array<T, 3> data_;

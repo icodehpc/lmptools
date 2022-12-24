@@ -30,7 +30,7 @@ Atom::Atom(Int32 id, Int32 mol_id, Int32 type, Str element, Float64 mass,
       force{force},
       dipole{dipole} {}
 
-Atom::Atom(const Atom &src)
+Atom::Atom(const Atom &src) noexcept
     : id(src.id),
       mol_id(src.mol_id),
       type(src.type),
