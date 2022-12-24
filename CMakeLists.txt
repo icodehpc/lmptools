@@ -29,7 +29,4 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 # Glob all tests
 file(GLOB ALLTESTS tests/cpp/*.cpp)
-
-add_executable(lmptoolstests ${ALLTESTS})
-target_link_libraries(lmptoolstests GTest::gtest GTest::gtest_main)
-add_test(LMPTOOLSTestSuite lmptoolstests)
+add_subdirectory(tests)
