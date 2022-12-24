@@ -1,73 +1,86 @@
 #include "atom.h"
 
+#include "utils.h"
+
 namespace lmptools {
-Atom::Atom(Int32 atomID, Int32 molID, Int32 type, Str element, Float64 mass,
+Atom::Atom(Int32 id, Int32 mol_id, Int32 type, Str element, Float64 mass,
            Float64 charge, Float64 radius, Float64 diameter,
            const Vec3<Float64> &omega, const Vec3<Float64> &angmom,
            const Vec3<Float64> &torque, const Vec3<Float64> &position,
-           const Vec3<Float64> &positionScaled,
-           const Vec3<Float64> &positionUnwrapped, const Vec3<Int32> &imageID,
+           const Vec3<Float64> &position_scaled,
+           const Vec3<Float64> &position_unwrapped, const Vec3<Int32> &image_id,
            const Vec3<Float64> &velocity, const Vec3<Float64> &force,
            const Vec3<Float64> &dipole)
-    : atomID_{atomID},
-      molID_{molID},
-      type_{type},
-      element_(std::move(element)),
-      mass_{mass},
-      charge_{charge},
-      radius_{radius},
-      diameter_{diameter},
-      omega_{omega},
-      angmom_{angmom},
-      torque_{torque},
-      position_{position},
-      positionScaled_{positionScaled},
-      positionUnwrapped_{positionUnwrapped},
-      imageID_{imageID},
-      velocity_{velocity},
-      force_{force},
-      dipole_{dipole} {}
+    : id{id},
+      mol_id{mol_id},
+      type{type},
+      element(std::move(element)),
+      mass{mass},
+      charge{charge},
+      radius{radius},
+      diameter{diameter},
+      omega{omega},
+      angmom{angmom},
+      torque{torque},
+      position{position},
+      position_scaled{position_scaled},
+      position_unwrapped{position_unwrapped},
+      image_id{image_id},
+      velocity{velocity},
+      force{force},
+      dipole{dipole} {}
 
 Atom::Atom(const Atom &src)
-    : atomID_(src.atomID_),
-      molID_(src.molID_),
-      type_(src.type_),
-      mass_(src.mass_),
-      charge_(src.charge_),
-      radius_(src.radius_),
-      diameter_(src.diameter_),
-      omega_(src.omega_),
-      angmom_(src.angmom_),
-      torque_(src.torque_),
-      position_(src.position_),
-      positionScaled_(src.positionScaled_),
-      positionUnwrapped_(src.positionUnwrapped_),
-      imageID_(src.imageID_),
-      velocity_(src.velocity_),
-      force_(src.force_),
-      dipole_(src.dipole_) {}
+    : id(src.id),
+      mol_id(src.mol_id),
+      type(src.type),
+      mass(src.mass),
+      charge(src.charge),
+      radius(src.radius),
+      diameter(src.diameter),
+      omega(src.omega),
+      angmom(src.angmom),
+      torque(src.torque),
+      position(src.position),
+      position_scaled(src.position_scaled),
+      position_unwrapped(src.position_unwrapped),
+      image_id(src.image_id),
+      velocity(src.velocity),
+      force(src.force),
+      dipole(src.dipole) {}
 
-Atom &Atom::operator=(const Atom &src) {
-  atomID_ = src.atomID_;
-  molID_ = src.molID_;
-  type_ = src.type_;
-  element_ = src.element_;
-  mass_ = src.mass_;
-  charge_ = src.charge_;
-  radius_ = src.radius_;
-  diameter_ = src.diameter_;
-  omega_ = src.omega_;
-  angmom_ = src.angmom_;
-  torque_ = src.torque_;
-  position_ = src.position_;
-  positionScaled_ = src.positionScaled_;
-  positionUnwrapped_ = src.positionUnwrapped_;
-  imageID_ = src.imageID_;
-  velocity_ = src.velocity_;
-  force_ = src.force_;
-  dipole_ = src.dipole_;
+Atom &Atom::operator=(const Atom &src) noexcept {
+  id = src.id;
+  mol_id = src.mol_id;
+  type = src.type;
+  element = src.element;
+  mass = src.mass;
+  charge = src.charge;
+  radius = src.radius;
+  diameter = src.diameter;
+  omega = src.omega;
+  angmom = src.angmom;
+  torque = src.torque;
+  position = src.position;
+  position_scaled = src.position_scaled;
+  position_unwrapped = src.position_unwrapped;
+  image_id = src.image_id;
+  velocity = src.velocity;
+  force = src.force;
+  dipole = src.dipole;
 
   return *this;
+}
+
+bool Atom::operator==(const Atom &other) const noexcept {
+  return is_equal(id, other.id, mol_id, other.mol_id, type, other.type, element,
+                  other.element, mass, other.mass, charge, other.charge, radius,
+                  other.radius, diameter, other.diameter, omega, other.omega,
+                  angmom, other.angmom, torque, other.torque, position,
+                  other.position, position_scaled, other.position_scaled,
+                  position_unwrapped, other.position_unwrapped, image_id,
+                  other.image_id, velocity, other.velocity, force, other.force,
+                  dipole, other.dipole);
 }
 
 }  // namespace lmptools

@@ -50,32 +50,16 @@ class Vec3 {
   const T& operator[](Int32 index) const { return data_[index]; }
   T& operator[](Int32 index) { return data_[index]; }
 
-  T norm() const {
-    if constexpr (std::is_floating_point<T>::value) {
-      // L2 norm
-      return std::sqrt(
-          std::inner_product(data_.begin(), data_.end(), data_.begin(), 0.0));
-    } else if constexpr (std::is_integral<T>::value) {
-      // L1 norm
-      return std::abs(data_[0]) + std::abs(data_[1]) + std::abs(data_[2]);
-    }
-  }
+  T norm() const;
 
-  Vec3& operator=(const Vec3& src) {
-    data_[0] = src[0];
-    data_[1] = src[1];
-    data_[2] = src[2];
-    return *this;
-  }
+  Vec3& operator=(const Vec3& src);
 
-  bool operator==(const Vec3& other) {
-    return (data_[0] == other[0]) && (data_[1] == other[1]) &&
-           (data_[2] == other[2]);
-  }
+  friend bool operator==(const Vec3& a, const Vec3& b) noexcept;
 
  private:
   std::array<T, 3> data_;
 };
 
 }  // namespace lmptools
+
 #endif

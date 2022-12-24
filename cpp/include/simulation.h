@@ -12,8 +12,7 @@ struct SimulationBox {
   double zlo;
   double zhi;
 
-  SimulationBox()
-      : xlo{0.0}, xhi{0.0}, ylo{0.0}, yhi{0.0}, zlo{0.0}, zhi{0.0} {};
+  SimulationBox();
   SimulationBox(double xlo, double xhi, double ylo, double yhi, double zlo,
                 double zhi);
 
