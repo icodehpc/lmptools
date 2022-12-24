@@ -2,9 +2,13 @@
 
 ## [Unreleased]
 
-### Added
+### Changed
+- Seperated `CMakeLists.txt` for tests
+- Updated default constructors for classes
 
-- Added new tests to validate `DumpSnapshot` constructors, getters and setters
+### Added
+- Added tests for `SimulationBox` and `utils`
+- Added method to return a const reference to `Atom` from a snapshot
 
 ### Changed
 
