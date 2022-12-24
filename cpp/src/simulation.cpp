@@ -8,7 +8,7 @@ SimulationBox::SimulationBox(double xlo, double xhi, double ylo, double yhi,
                              double zlo, double zhi)
     : xlo(xlo), xhi(xhi), ylo(ylo), yhi(yhi), zlo(zlo), zhi(zhi) {}
 
-auto SimulationBox::operator==(const SimulationBox &other) {
+bool SimulationBox::operator==(const SimulationBox &other) const noexcept {
   return is_equal(xlo, other.xlo, xhi, other.xhi, ylo, other.ylo, yhi,
                   other.yhi, zlo, other.zlo, zhi, other.zhi);
 }
@@ -27,7 +27,7 @@ TriclinicBox::TriclinicBox(double xlo, double xhi, double ylo, double yhi,
                            double yz)
     : SimulationBox(xlo, xhi, ylo, yhi, zlo, zhi), xy(xy), xz(xz), yz(yz) {}
 
-auto TriclinicBox::operator==(const TriclinicBox &other) {
+bool TriclinicBox::operator==(const TriclinicBox &other) const noexcept {
   return is_equal(xlo, other.xlo, ylo, other.ylo, zlo, other.zlo, xhi,
                   other.xhi, yhi, other.yhi, zhi, other.zhi, xy, other.xy, xz,
                   other.xz, yz, other.yz);

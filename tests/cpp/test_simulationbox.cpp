@@ -22,4 +22,3 @@ TEST(SimulationxBox, SimpleConstructor) {
   ASSERT_EQ(box.zlo, 0.0);
   ASSERT_EQ(box.zhi, 1.0);
 }
-

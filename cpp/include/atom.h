@@ -1,6 +1,7 @@
 #ifndef ATOM_H
 #define ATOM_H
 
+#include <map>
 #include <string>
 
 #include "utils.h"
@@ -27,39 +28,42 @@ class Atom {
   Atom(const Atom &atom);
 
   // Move constructor
-  Atom(const Atom &&atom) noexcept;
+  Atom(const Atom &&atom) noexcept {}
 
   ~Atom() = default;
 
- private:
-  const Int32 atomID, molID, type;
-  const Str element;
+  // Assignment operator
+  Atom &operator=(const Atom &src);
 
-  const Float64 mass, charge;
+ private:
+  Int32 atomID_, molID_, type_;
+  Str element_;
+
+  Float64 mass_, charge_;
 
   // Spherical particles
-  const Float64 radius, diameter;
+  Float64 radius_, diameter_;
 
   // Angular velocity/momentum
-  const Vec3<Float64> omega, angmom;
+  Vec3<Float64> omega_, angmom_;
 
   // Torque on finite sized particles
-  const Vec3<Float64> torque;
+  Vec3<Float64> torque_;
 
   // Atom coordinates
-  const Vec3<Float64> position, positionScaled, positionUnwrapped;
+  Vec3<Float64> position_, positionScaled_, positionUnwrapped_;
 
   // Image ids
-  const Vec3<Int32> imageID;
+  Vec3<Int32> imageID_;
 
   // Atom velocities
-  const Vec3<Float64> velocity;
+  Vec3<Float64> velocity_;
 
   // Atom forces
-  const Vec3<Float64> force;
+  Vec3<Float64> force_;
 
   // Dipole
-  const Vec3<Float64> dipole;
+  Vec3<Float64> dipole_;
 };
 
 }  // namespace lmptools

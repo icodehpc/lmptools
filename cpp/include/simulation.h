@@ -4,25 +4,28 @@
 #include <ostream>
 
 namespace lmptools {
-class SimulationBox {
- public:
-  double xlo, xhi;
-  double ylo, yhi;
-  double zlo, zhi;
+struct SimulationBox {
+  double xlo;
+  double xhi;
+  double ylo;
+  double yhi;
+  double zlo;
+  double zhi;
 
-  SimulationBox() = default;
+  SimulationBox()
+      : xlo{0.0}, xhi{0.0}, ylo{0.0}, yhi{0.0}, zlo{0.0}, zhi{0.0} {};
   SimulationBox(double xlo, double xhi, double ylo, double yhi, double zlo,
                 double zhi);
 
   ~SimulationBox() = default;
 
-  [[nodiscard]] auto lx() const -> double { return xhi - xlo; }
-  [[nodiscard]] auto ly() const -> double { return yhi - ylo; }
-  [[nodiscard]] auto lz() const -> double { return zhi - zlo; }
+  [[nodiscard]] auto lx() const noexcept { return xhi - xlo; }
+  [[nodiscard]] auto ly() const noexcept { return yhi - ylo; }
+  [[nodiscard]] auto lz() const noexcept { return zhi - zlo; }
 
   // Comparison operator
-  bool operator==(const SimulationBox &other) const = default;
-  auto operator==(const SimulationBox &other);
+  bool operator==(const SimulationBox &other) const noexcept;
+  // auto operator==(const SimulationBox &other);
 
   // ostream operator
   std::ostream &operator<<(std::ostream &out);
@@ -38,8 +41,8 @@ class TriclinicBox : public SimulationBox {
                double zhi, double xy, double xz, double yz);
 
   // Comparison operator
-  bool operator==(const TriclinicBox &other) const = default;
-  auto operator==(const TriclinicBox &other);
+  bool operator==(const TriclinicBox &other) const noexcept;
+  //  auto operator==(const TriclinicBox &other);
 
   // ostream operator
   std::ostream &operator<<(std::ostream &out);

@@ -29,25 +29,14 @@ enum DumpStyle {
  * */
 class DumpSnapshot {
  public:
-  DumpSnapshot() = default;
-
-  DumpSnapshot(Int32 dumpStyle, Int64 timestep)
-      : dumpStyle_(dumpStyle), timestep_(timestep) {}
+  DumpSnapshot();
+  DumpSnapshot(Int32 dumpStyle, Int64 timestep);
 
   DumpSnapshot(Int32 dumpStyle, Int64 timestep, Int64 natoms,
-               const SimulationBox &box)
-      : dumpStyle_(dumpStyle),
-        timestep_(timestep),
-        natoms_(natoms),
-        box_(box) {}
+               const SimulationBox &box);
 
   DumpSnapshot(Int32 dumpStyle, Int64 timestep, Int64 natoms,
-               const SimulationBox &box, const std::vector<Atom> &atoms)
-      : dumpStyle_(dumpStyle),
-        timestep_(timestep),
-        natoms_(natoms),
-        box_(box),
-        atoms_(atoms) {}
+               const SimulationBox &box, const std::vector<Atom> &atoms);
 
   //  ~DumpSnapshot();
 
@@ -88,6 +77,8 @@ class DumpSnapshot {
     return const_cast<decltype(box_) &>(
         const_cast<const DumpSnapshot *>(this)->box());
   }
+
+  const Atom &atom(Int64 id) const { return atoms_[id]; };
 
  private:
   Int32 dumpStyle_;
